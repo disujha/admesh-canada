@@ -25,7 +25,7 @@ const FORMATS: FormatCard[] = [
     retailType: 'Convenience • Pharmacy • Cafe',
     visibilityScore: '8.2',
     startingPrice: '$5/store',
-    imageUrl: '/images/admesh-counter-promo-card.png',
+    imageUrl: '/images/admesh-counter-promo-card.jpeg',
     advantage: 'Captures attention at the point of sale during transaction checkout.',
     specs: 'Pre-laminated high-tac vinyl',
     dimensions: '297mm × 210mm'
@@ -37,7 +37,7 @@ const FORMATS: FormatCard[] = [
     retailType: 'Convenience • Pharmacy • Cafe',
     visibilityScore: '8.6',
     startingPrice: '$9/store',
-    imageUrl: '/images/admesh-countertop-display-unit.png',
+    imageUrl: '/images/admesh-countertop-display-unit.jpeg',
     advantage: '3D structural placement ensures active eye-level gaze tracking.',
     specs: 'Premium 3mm gloss acrylic',
     dimensions: '210mm × 148mm × 80mm'
@@ -49,7 +49,7 @@ const FORMATS: FormatCard[] = [
     retailType: 'Convenience • Cafe • Grocery',
     visibilityScore: '8.4',
     startingPrice: '$7/store',
-    imageUrl: '/images/admesh-aisle-dangler.png',
+    imageUrl: '/images/admesh-aisle-dangler.jpeg',
     advantage: 'Extended dwell visibility hanging directly above product aisles.',
     specs: '350 GSM double-side printed card',
     dimensions: '300mm × 300mm'
@@ -61,7 +61,7 @@ const FORMATS: FormatCard[] = [
     retailType: 'Convenience • Pharmacy • Grocery',
     visibilityScore: '8.9',
     startingPrice: '$12/store',
-    imageUrl: '/images/admesh-shelf-edge-branding.png',
+    imageUrl: '/images/admesh-shelf-edge-branding.jpeg',
     advantage: 'Drives instant in-category brand recognition and impulse buys.',
     specs: 'Scratch-proof rigid PVC strips',
     dimensions: '900mm × 40mm'
@@ -73,7 +73,7 @@ const FORMATS: FormatCard[] = [
     retailType: 'Cafe • Coffee Shop • Barber',
     visibilityScore: '8.7',
     startingPrice: '$8/store',
-    imageUrl: '/images/admesh-instore-poster-display.png',
+    imageUrl: '/images/admesh-instore-poster-display.jpeg',
     advantage: 'High-contrast branding aligned to seating spots and social areas.',
     specs: '220 GSM gloss poster paper',
     dimensions: '594mm × 420mm (A2)'
@@ -85,7 +85,7 @@ const FORMATS: FormatCard[] = [
     retailType: 'Convenience • Electronics • Cafe',
     visibilityScore: '9.1',
     startingPrice: '$19/store',
-    imageUrl: '/images/admesh-exterior-shelf-banner.png',
+    imageUrl: '/images/admesh-exterior-shelf-banner.jpeg',
     advantage: 'Deep street exposure capturing neighborhood foot traffic 24/7.',
     specs: '440 GSM frontlit matte flex sheet',
     dimensions: '1800mm × 900mm'
@@ -97,7 +97,7 @@ const FORMATS: FormatCard[] = [
     retailType: 'Convenience • Pharmacy • Cafe',
     visibilityScore: '9.3',
     startingPrice: '$29/store',
-    imageUrl: '/images/admesh-shutter-branding.png',
+    imageUrl: '/images/admesh-shutter-branding.jpeg',
     advantage: 'Dominates neighborhood streets with high visual coverage.',
     specs: 'Industrial flexible adhesive vinyl',
     dimensions: '2400mm × 2100mm'
@@ -109,7 +109,7 @@ const FORMATS: FormatCard[] = [
     retailType: 'Cafe • Pharmacy • Supermarket',
     visibilityScore: '9.5',
     startingPrice: '$45/store',
-    imageUrl: '/images/admesh-smart-digital-screen.png',
+    imageUrl: '/images/admesh-smart-digital-screen.jpeg',
     advantage: 'Dynamic digital scheduling, remote updates, and movement capture.',
     specs: 'Plug-and-play smart media terminal',
     dimensions: '32-inch Slim LCD Panel'
@@ -121,7 +121,7 @@ const FORMATS: FormatCard[] = [
     retailType: 'Convenience • Pharmacy • Grocery',
     visibilityScore: '9.8',
     startingPrice: '$120/store',
-    imageUrl: '/images/admesh-store-takeover.png',
+    imageUrl: '/images/admesh-store-takeover.jpeg',
     advantage: 'Maximum impact, turns the entire local store into your brand billboard.',
     specs: 'Multi-asset complete wrap package including window graphics, signs, counters, and stickers.',
     dimensions: 'Multi-Asset Wrap Package'

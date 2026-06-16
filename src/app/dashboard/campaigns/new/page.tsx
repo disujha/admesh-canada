@@ -40,7 +40,7 @@ const PLACEMENTS: PlacementType[] = [
     useCase: 'Drives high-impact street-level awareness to foot traffic before store entry.',
     visibility: 'Very High (9.1/10)',
     costPerStore: 150,
-    imageUrl: '/images/admesh-instore-poster-display.png',
+    imageUrl: '/images/admesh-instore-poster-display.jpeg',
     recommendedObjectives: ['Brand Awareness', 'Seasonal Promotion', 'Local Marketing']
   },
   {
@@ -49,7 +49,7 @@ const PLACEMENTS: PlacementType[] = [
     useCase: 'Category highlight strips to steer instant brand recognition and shelf choice.',
     visibility: 'High (8.9/10)',
     costPerStore: 120,
-    imageUrl: '/images/admesh-shelf-edge-branding.png',
+    imageUrl: '/images/admesh-shelf-edge-branding.jpeg',
     recommendedObjectives: ['Product Launch', 'Sales Campaign', 'Seasonal Promotion']
   },
   {
@@ -58,7 +58,7 @@ const PLACEMENTS: PlacementType[] = [
     useCase: '3D structural placement at cash registers for active impulse gaze tracking.',
     visibility: 'Excellent (8.6/10)',
     costPerStore: 180,
-    imageUrl: '/images/admesh-countertop-display-unit.png',
+    imageUrl: '/images/admesh-countertop-display-unit.jpeg',
     recommendedObjectives: ['Product Launch', 'Sales Campaign']
   },
   {
@@ -67,7 +67,7 @@ const PLACEMENTS: PlacementType[] = [
     useCase: 'Plug-and-play digital scheduling for dynamic in-store media campaigns.',
     visibility: 'High (8.7/10)',
     costPerStore: 250,
-    imageUrl: '/images/admesh-smart-digital-screen.png',
+    imageUrl: '/images/admesh-smart-digital-screen.jpeg',
     recommendedObjectives: ['Brand Awareness', 'Product Launch', 'Seasonal Promotion']
   },
   {
@@ -76,7 +76,7 @@ const PLACEMENTS: PlacementType[] = [
     useCase: 'Double-sided adhesive wraps catching attention during doors opening.',
     visibility: 'Good (8.2/10)',
     costPerStore: 100,
-    imageUrl: '/images/admesh-counter-promo-card.png',
+    imageUrl: '/images/admesh-counter-promo-card.jpeg',
     recommendedObjectives: ['Brand Awareness', 'Local Marketing']
   }
 ];
@@ -151,7 +151,7 @@ export default function StrategistCampaignWizard() {
           startDate: new Date().toISOString().split('T')[0],
           endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
           selectedPlacements: ['storefront-poster', 'shelf-branding'],
-          artworkUrl: '/images/admesh-network.png',
+          artworkUrl: '/images/admesh-network.jpeg',
           artworkName: 'back_to_school_creative.png'
         }));
         setGeneratingAi(false);
@@ -209,9 +209,9 @@ export default function StrategistCampaignWizard() {
 
   const [backdrop, setBackdrop] = useState<'convenience' | 'cafe' | 'pharmacy'>('convenience');
   const backdropImages = {
-    convenience: '/images/storefront.png',
-    cafe: '/images/cafe.png',
-    pharmacy: '/images/medical.png'
+    convenience: '/images/storefront.jpeg',
+    cafe: '/images/cafe.jpeg',
+    pharmacy: '/images/medical.jpeg'
   };
 
   const predictions = useMemo(() => {
@@ -242,7 +242,7 @@ export default function StrategistCampaignWizard() {
         adFormat: {
           id: formData.selectedPlacements[0] || 'storefront-poster',
           name: selectedPlacementsNames.join(', ') || 'Storefront Posters',
-          imageUrl: PLACEMENTS.find(p => p.id === formData.selectedPlacements[0])?.imageUrl || '/images/admesh-instore-poster-display.png'
+          imageUrl: PLACEMENTS.find(p => p.id === formData.selectedPlacements[0])?.imageUrl || '/images/admesh-instore-poster-display.jpeg'
         },
         adSize: 'Standard Placement',
         retailTypes: formData.storeCategories,
@@ -588,7 +588,7 @@ export default function StrategistCampaignWizard() {
                   </div>
                   <button
                     type="button"
-                    onClick={() => setFormData(prev => ({ ...prev, artworkUrl: '/images/admesh-network.png', artworkName: 'strategist_creative_brief.png' }))}
+                    onClick={() => setFormData(prev => ({ ...prev, artworkUrl: '/images/admesh-network.jpeg', artworkName: 'strategist_creative_brief.png' }))}
                     style={{ border: '1px solid rgba(17,35,59,0.15)', backgroundColor: '#E7E5DB', padding: '8px 20px', fontSize: '10px', fontWeight: 700, fontFamily: 'var(--font-mono)', textTransform: 'uppercase', color: '#11233B', cursor: 'pointer', width: '100%' }}
                   >
                     Use Sample Artwork

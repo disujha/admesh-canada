@@ -24,7 +24,7 @@ const ENVIRONMENTS: EnvironmentItem[] = [
     bestCampaigns: 'Best for CPG, beverages & fintech campaigns',
     repeatVisibility: 'Very High',
     peakTraffic: '4:00 PM - 8:00 PM',
-    imageUrl: '/images/storefront.png'
+    imageUrl: '/images/storefront.jpeg'
   },
   {
     id: 'gas_station',
@@ -34,7 +34,7 @@ const ENVIRONMENTS: EnvironmentItem[] = [
     bestCampaigns: 'Best for snacks, beverages & auto insurance',
     repeatVisibility: 'High',
     peakTraffic: '7:00 AM - 9:00 AM & 3:00 PM - 6:00 PM',
-    imageUrl: '/images/instore.png'
+    imageUrl: '/images/instore.jpeg'
   },
   {
     id: 'pharmacy',
@@ -44,7 +44,7 @@ const ENVIRONMENTS: EnvironmentItem[] = [
     bestCampaigns: 'Best for wellness, insurance & baby care',
     repeatVisibility: 'Medium-High',
     peakTraffic: '11:00 AM - 1:00 PM & 5:00 PM - 7:00 PM',
-    imageUrl: '/images/medical.png'
+    imageUrl: '/images/medical.jpeg'
   },
   {
     id: 'cafe',
@@ -54,7 +54,7 @@ const ENVIRONMENTS: EnvironmentItem[] = [
     bestCampaigns: 'Best for consumer services, lifestyle brands & SaaS',
     repeatVisibility: 'Medium',
     peakTraffic: '8:00 AM - 11:00 AM & 2:00 PM - 4:00 PM',
-    imageUrl: '/images/cafe.png'
+    imageUrl: '/images/cafe.jpeg'
   }
 ];
 

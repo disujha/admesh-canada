@@ -112,7 +112,7 @@ const BrandDashboardPreview = () => {
               {/* Main Image */}
               <div className="relative aspect-[16/10] overflow-hidden bg-slate-50 rounded-[12px] border border-slate-200">
                 <img
-                  src="/images/admesh-network.png"
+                  src="/images/admesh-network.jpeg"
                   alt="AdMesh Programmatic Dashboard Console"
                   className="w-full h-full object-cover object-top grayscale-[15%] contrast-[1.08]"
                 />
@@ -137,7 +137,7 @@ const BrandDashboardPreview = () => {
                 </div>
                 <div className="relative h-24 overflow-hidden rounded-xl border border-slate-200">
                   <img
-                    src="/images/tracker.png"
+                    src="/images/tracker.jpeg"
                     alt="Hyperlocal live network tracking map"
                     className="w-full h-full object-cover grayscale-[30%] contrast-[1.15] brightness-[1.02]"
                   />

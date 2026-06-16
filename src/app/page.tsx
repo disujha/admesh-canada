@@ -227,7 +227,7 @@ const LandingPage = () => {
                   <div className="reticle-frame bg-[#0A1A2C] shadow-lg">
                     <div className="reticle-frame-inner"></div>
                     <img 
-                      src="/images/admesh-smart-digital-screen.png" 
+                      src="/images/admesh-smart-digital-screen.jpeg" 
                       alt="Cropped storefront interior digital screen node" 
                       className="w-full aspect-[16/10] object-cover grayscale opacity-90 hover:grayscale-0 transition-all duration-500"
                     />
@@ -464,7 +464,7 @@ const LandingPage = () => {
                   <div className="reticle-frame bg-[#0A1A2C] shadow-lg">
                     <div className="reticle-frame-inner"></div>
                     <img 
-                      src="/images/instore.png" 
+                      src="/images/instore.jpeg" 
                       alt="CPG beverage campaign execution in retail store" 
                       className="w-full aspect-[16/10] object-cover grayscale opacity-95 hover:grayscale-0 transition-all duration-500"
                     />

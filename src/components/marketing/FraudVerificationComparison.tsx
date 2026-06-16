@@ -94,7 +94,7 @@ const FraudVerificationComparison = () => {
           <div className="relative mt-8 overflow-hidden rounded-2xl border border-slate-200">
             <div className="aspect-video bg-slate-100 opacity-60">
               <img
-                src="/images/storefront.png"
+                src="/images/storefront.jpeg"
                 alt="Unverified proof"
                 className="w-full h-full object-cover"
               />
