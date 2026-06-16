@@ -4,13 +4,10 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { db } from '@/lib/firebase';
 import { collection, query, where, getDocs } from 'firebase/firestore';
-import { motion } from 'framer-motion';
 import {
   Plus,
   Search,
-  Filter,
   ExternalLink,
-  MoreVertical,
   MapPin,
   Calendar,
   ShieldCheck,
@@ -37,14 +34,10 @@ type Campaign = {
 type ExecutionOrderDoc = {
   campaignRequestId?: string;
   status?: string;
-  assignment?: {
-    agentName?: string;
-  };
+  assignment?: { agentName?: string };
   brief?: {
     printResponsibility?: string;
-    payout?: {
-      schedule?: string;
-    };
+    payout?: { schedule?: string };
   };
 };
 
@@ -60,45 +53,44 @@ const CampaignsList = () => {
       if (!brandId) return;
 
       try {
-        const executionOrderMap: Record<string, ExecutionOrderDoc> = {};
-        try {
-          const qExecution = query(
-            collection(db, 'campaign_execution_orders'),
-            where('brandId', '==', brandId)
-          );
-          const executionSnap = await getDocs(qExecution);
-          executionSnap.forEach((executionDoc) => {
-            const executionData = executionDoc.data();
-            const requestId = executionData.campaignRequestId as string | undefined;
-            if (requestId) executionOrderMap[requestId] = executionData;
-          });
-        } catch (err) {
-          console.warn('Error fetching campaign_execution_orders:', err);
-        }
-
-        // Query offers (actual campaigns)
         let offersList: Campaign[] = [];
-        try {
-          const qOffers = query(
-            collection(db, 'offers'),
-            where('brandId', '==', brandId)
-          );
-          const offersSnap = await getDocs(qOffers);
-          offersList = offersSnap.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          })) as Campaign[];
-        } catch (err) {
-          console.warn('Error fetching offers:', err);
-        }
-
-        // Query campaign_requests (new request wizard submissions)
         let requestsList: Campaign[] = [];
+
+        // Execution orders map
+        let executionOrderMap: Record<string, ExecutionOrderDoc> = {};
         try {
-          const qReqs = query(
-            collection(db, 'campaign_requests'),
-            where('brandId', '==', brandId)
-          );
+          const execSnap = await getDocs(collection(db, 'execution_orders'));
+          execSnap.docs.forEach((d) => {
+            const data = d.data() as ExecutionOrderDoc;
+            if (data.campaignRequestId) {
+              executionOrderMap[data.campaignRequestId] = data;
+            }
+          });
+        } catch {}
+
+        // Offers
+        try {
+          const qOffers = query(collection(db, 'offers'), where('brandId', '==', brandId));
+          const offersSnap = await getDocs(qOffers);
+          offersList = offersSnap.docs.map((doc) => {
+            const data = doc.data();
+            return {
+              id: doc.id,
+              title: data.title || 'Active Campaign',
+              status: data.status || 'active',
+              location: data.location || 'Multi-city',
+              createdAt: data.createdAt,
+              assets: data.assets,
+              adConfig: data.adConfig,
+              placementType: data.placementType,
+              performance: data.performance,
+            };
+          }) as Campaign[];
+        } catch {}
+
+        // Campaign requests
+        try {
+          const qReqs = query(collection(db, 'campaign_requests'), where('brandId', '==', brandId));
           const reqsSnap = await getDocs(qReqs);
           requestsList = reqsSnap.docs.map((doc) => {
             const data = doc.data();
@@ -108,27 +100,18 @@ const CampaignsList = () => {
               status: data.status || 'pending',
               location: data.targetLocations || 'Multi-city',
               createdAt: data.createdAt,
-              assets: {
-                referenceImages: data.adFormat?.imageUrl ? [data.adFormat.imageUrl] : [],
-              },
-              adConfig: {
-                adType: data.adFormat?.name || 'Retail Ad',
-              },
+              assets: { referenceImages: data.adFormat?.imageUrl ? [data.adFormat.imageUrl] : [] },
+              adConfig: { adType: data.adFormat?.name || 'Retail Ad' },
               placementType: data.adSize || 'Custom Size',
-              performance: {
-                complianceRate: 0,
-              },
+              performance: { complianceRate: 0 },
               assignedAgentName: executionOrderMap[doc.id]?.assignment?.agentName || data.assignedAgentName,
               executionStatus: executionOrderMap[doc.id]?.status,
               printResponsibility: executionOrderMap[doc.id]?.brief?.printResponsibility,
               payoutSchedule: executionOrderMap[doc.id]?.brief?.payout?.schedule,
             };
           }) as Campaign[];
-        } catch (err) {
-          console.warn('Error fetching campaign_requests:', err);
-        }
+        } catch {}
 
-        // Combine and sort by createdAt descending
         const combined = [...requestsList, ...offersList].sort((a, b) => {
           const timeA = a.createdAt?.seconds || 0;
           const timeB = b.createdAt?.seconds || 0;
@@ -150,119 +133,104 @@ const CampaignsList = () => {
     (c.title || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const statusColors: Record<string, { bg: string; color: string; border: string }> = {
+    active: { bg: 'rgba(16,185,129,0.08)', color: '#10b981', border: 'rgba(16,185,129,0.2)' },
+    live: { bg: 'rgba(16,185,129,0.08)', color: '#10b981', border: 'rgba(16,185,129,0.2)' },
+    pending: { bg: 'rgba(255,179,0,0.08)', color: '#FFB300', border: 'rgba(255,179,0,0.2)' },
+    review: { bg: 'rgba(255,179,0,0.08)', color: '#FFB300', border: 'rgba(255,179,0,0.2)' },
+    draft: { bg: 'rgba(82,97,122,0.08)', color: '#52617A', border: 'rgba(82,97,122,0.15)' },
+  };
+
   return (
     <div className="db-page">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
         <div>
-          <h1 className="db-heading">Campaigns</h1>
-          <p className="text-muted-foreground">Manage and track all your active and past campaigns.</p>
+          <h1 style={{ fontSize: '28px', fontWeight: 900, color: '#11233B', textTransform: 'uppercase', letterSpacing: '-0.02em', fontFamily: 'var(--font-space)', marginBottom: '4px' }}>Campaigns</h1>
+          <p style={{ fontSize: '11px', color: '#52617A', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Manage and track all your active and past campaigns.</p>
         </div>
-        <Link href="/dashboard/campaigns/new" className="db-btn-primary flex items-center gap-2">
-          <Plus size={18} /> New Request
+        <Link href="/dashboard/campaigns/new" className="db-btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '11px' }}>
+          <Plus size={14} /> New Campaign
         </Link>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4 db-card p-4">
-        <div className="relative flex-grow">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
+      {/* Search bar */}
+      <div style={{ backgroundColor: '#ffffff', border: '1px solid rgba(17,35,59,0.10)', padding: '16px 20px', display: 'flex', gap: '12px', alignItems: 'center' }}>
+        <div style={{ position: 'relative', flex: 1 }}>
+          <Search size={13} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#52617A' }} />
           <input
             type="text"
             placeholder="Search campaigns..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="db-input w-full pl-10 pr-4 py-2"
+            className="font-mono text-[#11233B] focus:outline-none focus:border-[#11233B] transition-all w-full"
+            style={{ border: '1px solid rgba(17,35,59,0.12)', backgroundColor: '#F1EFE6', padding: '9px 12px 9px 34px', fontSize: '11px' }}
           />
         </div>
-        <button className="db-btn-ghost flex items-center gap-2 px-6">
-          <Filter size={18} /> Filters
-        </button>
       </div>
 
+      {/* Content */}
       {loading ? (
-        <div className="flex justify-center py-20">
-          <div className="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin" />
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }}>
+          <div className="w-8 h-8 border-2 border-[#FFB300] border-t-transparent rounded-full animate-spin" />
         </div>
       ) : filteredCampaigns.length === 0 ? (
-        <div className="db-card border-dashed py-24 text-center">
-          <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-300">
-            <TrendingUp size={40} />
-          </div>
-          <h3 className="text-xl font-bold mb-2">No campaigns found</h3>
-          <p className="text-muted-foreground mb-8">You haven&apos;t created any campaigns yet.</p>
-          <Link href="/dashboard/campaigns/new" className="db-btn-primary">Create Your First Campaign</Link>
+        <div style={{ backgroundColor: '#ffffff', border: '2px dashed rgba(17,35,59,0.12)', padding: '80px 40px', textAlign: 'center' }}>
+          <TrendingUp size={36} style={{ margin: '0 auto 16px', color: 'rgba(17,35,59,0.15)' }} />
+          <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#11233B', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', marginBottom: '8px' }}>No campaigns found</h3>
+          <p style={{ fontSize: '12px', color: '#52617A', fontFamily: 'var(--font-mono)', marginBottom: '24px' }}>You haven&apos;t created any campaigns yet.</p>
+          <Link href="/dashboard/campaigns/new" className="db-btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '11px' }}>
+            <Plus size={13} /> Create Your First Campaign
+          </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {filteredCampaigns.map((campaign, i) => (
-            <motion.div
-              key={campaign.id}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: i * 0.05 }}
-              className="db-card rounded-[1.5rem] overflow-hidden hover:shadow-xl transition-all group"
-            >
-              <div className="aspect-video bg-[#17181B] relative">
-                {campaign.assets?.referenceImages?.[0] ? (
-                  <img src={campaign.assets.referenceImages[0]} alt={campaign.title} className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-slate-300 font-bold text-xl bg-[radial-gradient(circle_at_center,rgba(201,115,32,0.25),transparent_70%)]">
-                    AD PREVIEW
-                  </div>
-                )}
-                <div className="absolute top-4 right-4">
-                  <div className={`db-chip shadow-lg ${
-                    campaign.status === 'active' ? 'bg-green-500 text-white' :
-                    campaign.status === 'review' ? 'bg-orange-500 text-white' : 'bg-slate-500 text-white'
-                  }`}>
-                    {(campaign.status || 'draft').toUpperCase()}
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-6 space-y-4">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="text-xl font-bold group-hover:text-amber-300 transition-colors">{campaign.title || 'Untitled Campaign'}</h3>
-                    <p className="text-sm text-muted-foreground">{campaign.adConfig?.adType} - {campaign.placementType}</p>
-                  </div>
-                  <button className="p-2 hover:bg-white/5 rounded-full">
-                    <MoreVertical size={18} />
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 py-2 border-y border-white/5">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <MapPin size={16} /> {campaign.location || 'Multi-city'}
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Calendar size={16} /> {campaign.createdAt?.seconds ? new Date(campaign.createdAt.seconds * 1000).toLocaleDateString() : 'N/A'}
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Compliance</p>
-                    <div className="flex items-center gap-2 text-emerald-400 font-bold">
-                      <ShieldCheck size={16} /> {campaign.performance?.complianceRate || '0'}%
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
+          {filteredCampaigns.map((campaign) => {
+            const sc = statusColors[campaign.status || 'draft'] || statusColors.draft;
+            const previewImg = campaign.assets?.referenceImages?.[0];
+            return (
+              <div key={campaign.id} style={{ backgroundColor: '#ffffff', border: '1px solid rgba(17,35,59,0.10)', overflow: 'hidden', transition: 'box-shadow 0.15s ease' }}>
+                {/* Image */}
+                <div style={{ aspectRatio: '16/9', backgroundColor: '#E7E5DB', position: 'relative', overflow: 'hidden' }}>
+                  {previewImg ? (
+                    <img src={previewImg} alt={campaign.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 700, color: 'rgba(17,35,59,0.2)', fontFamily: 'var(--font-mono)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                      Ad Preview
                     </div>
-                    {(campaign.assignedAgentName || campaign.executionStatus) && (
-                      <div className="mt-2 space-y-1">
-                        {campaign.assignedAgentName && (
-                          <p className="text-[11px] text-slate-300">Agent: {campaign.assignedAgentName}</p>
-                        )}
-                        {campaign.executionStatus && (
-                          <p className="text-[11px] text-amber-300 uppercase">Execution: {campaign.executionStatus}</p>
-                        )}
-                      </div>
-                    )}
+                  )}
+                  {/* Status badge */}
+                  <div style={{ position: 'absolute', top: '10px', right: '10px', fontSize: '8px', fontWeight: 700, fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.1em', padding: '3px 8px', backgroundColor: sc.bg, color: sc.color, border: `1px solid ${sc.border}` }}>
+                    {campaign.status || 'draft'}
                   </div>
-                  <Link href={`/dashboard/campaigns/${campaign.id}`} className="db-btn-ghost py-2 px-4 text-xs flex items-center gap-2">
-                    Details <ExternalLink size={14} />
-                  </Link>
+                </div>
+
+                {/* Content */}
+                <div style={{ padding: '20px 22px' }}>
+                  <h3 style={{ fontSize: '13px', fontWeight: 700, color: '#11233B', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', marginBottom: '4px', letterSpacing: '0.03em' }}>{campaign.title || 'Untitled Campaign'}</h3>
+                  <p style={{ fontSize: '10px', color: '#52617A', fontFamily: 'var(--font-mono)', marginBottom: '14px' }}>{campaign.adConfig?.adType} · {campaign.placementType}</p>
+
+                  <div style={{ display: 'flex', gap: '16px', paddingBottom: '14px', marginBottom: '14px', borderBottom: '1px solid rgba(17,35,59,0.06)' }}>
+                    <span style={{ fontSize: '10px', color: '#52617A', display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'var(--font-mono)' }}>
+                      <MapPin size={10} /> {campaign.location || 'Multi-city'}
+                    </span>
+                    <span style={{ fontSize: '10px', color: '#52617A', display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'var(--font-mono)' }}>
+                      <Calendar size={10} /> {campaign.createdAt?.seconds ? new Date(campaign.createdAt.seconds * 1000).toLocaleDateString() : 'N/A'}
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#10b981', fontSize: '11px', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>
+                      <ShieldCheck size={12} /> {campaign.performance?.complianceRate || '0'}%
+                    </div>
+                    <Link href={`/dashboard/campaigns/${campaign.id}`} className="db-btn-ghost" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '10px', padding: '6px 12px' }}>
+                      Details <ExternalLink size={11} />
+                    </Link>
+                  </div>
                 </div>
               </div>
-            </motion.div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

@@ -14,7 +14,7 @@ import {
   Layers,
   FileText,
   CheckCircle,
-  X
+  X,
 } from 'lucide-react';
 
 type CampaignDetails = {
@@ -27,11 +27,7 @@ type CampaignDetails = {
   adConfig?: { adType?: string };
   placementType?: string;
   performance?: { complianceRate?: string | number };
-  // Campaign request fields:
-  adFormat?: {
-    name: string;
-    imageUrl?: string;
-  };
+  adFormat?: { name: string; imageUrl?: string };
   adSize?: string;
   retailTypes?: string[];
   outletCount?: number;
@@ -61,9 +57,7 @@ type CampaignDetails = {
 
 type ExecutionOrderDoc = {
   status?: string;
-  assignment?: {
-    agentName?: string;
-  };
+  assignment?: { agentName?: string };
   brief?: {
     printResponsibility?: string;
     materialSource?: string;
@@ -82,6 +76,17 @@ type ExecutionOrderDoc = {
   };
 };
 
+const LABEL = ({ children }: { children: React.ReactNode }) => (
+  <span style={{ fontSize: '9px', fontWeight: 700, color: '#52617A', textTransform: 'uppercase', letterSpacing: '0.1em', fontFamily: 'var(--font-mono)', display: 'block', marginBottom: '4px' }}>
+    {children}
+  </span>
+);
+const VALUE = ({ children }: { children: React.ReactNode }) => (
+  <span style={{ fontSize: '12px', fontWeight: 600, color: '#11233B', fontFamily: 'var(--font-mono)' }}>
+    {children}
+  </span>
+);
+
 export default function CampaignDetailsPage() {
   const params = useParams();
   const router = useRouter();
@@ -98,22 +103,15 @@ export default function CampaignDetailsPage() {
       setLoading(true);
       setError(null);
       try {
-        // 1. Try fetching from campaign_requests collection first
         const reqDoc = await getDoc(doc(db, 'campaign_requests', id));
         if (reqDoc.exists()) {
           const data = reqDoc.data();
           let executionOrder: ExecutionOrderDoc | null = null;
           try {
-            const qExecution = query(
-              collection(db, 'campaign_execution_orders'),
-              where('campaignRequestId', '==', reqDoc.id)
-            );
+            const qExecution = query(collection(db, 'campaign_execution_orders'), where('campaignRequestId', '==', reqDoc.id));
             const executionSnap = await getDocs(qExecution);
             if (!executionSnap.empty) executionOrder = executionSnap.docs[0].data();
-          } catch (executionError) {
-            console.warn('Error fetching execution order:', executionError);
-          }
-
+          } catch {}
           setCampaign({
             id: reqDoc.id,
             title: data.adFormat?.name ? `${data.adFormat.name} Request` : 'Campaign Request',
@@ -142,8 +140,7 @@ export default function CampaignDetailsPage() {
             placementInstructions: executionOrder?.brief?.placementInstructions || data.placementInstructions,
             targetRetailerProfile: executionOrder?.brief?.targetRetailerProfile || data.targetRetailerProfile,
             retailerPayoutPerInstall: executionOrder?.brief?.payout?.retailerPerInstall || data.retailerPayoutPerInstall,
-            agentCommissionPerInstall:
-              executionOrder?.brief?.payout?.agentCommissionPerInstall || data.agentCommissionPerInstall,
+            agentCommissionPerInstall: executionOrder?.brief?.payout?.agentCommissionPerInstall || data.agentCommissionPerInstall,
             payoutSchedule: executionOrder?.brief?.payout?.schedule || data.payoutSchedule,
             installByDate: executionOrder?.brief?.installByDate || data.installByDate,
             payoutRunDate: executionOrder?.brief?.payout?.payoutRunDate || data.payoutRunDate,
@@ -151,7 +148,6 @@ export default function CampaignDetailsPage() {
           return;
         }
 
-        // 2. Try fetching from offers collection
         const offerDoc = await getDoc(doc(db, 'offers', id));
         if (offerDoc.exists()) {
           const data = offerDoc.data();
@@ -168,7 +164,6 @@ export default function CampaignDetailsPage() {
           });
           return;
         }
-
         setError('No campaign or request found with this ID.');
       } catch (err) {
         console.error('Error fetching campaign details:', err);
@@ -177,282 +172,223 @@ export default function CampaignDetailsPage() {
         setLoading(false);
       }
     };
-
     void fetchDetails();
   }, [id]);
 
   if (loading) {
     return (
-      <div className="db-page flex flex-col items-center justify-center py-24">
-        <div className="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mb-4" />
-        <p className="text-muted-foreground text-sm">Fetching campaign deployment record...</p>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '100px 0' }}>
+        <div className="w-10 h-10 border-2 border-[#FFB300] border-t-transparent rounded-full animate-spin" style={{ marginBottom: '16px' }} />
+        <p style={{ fontSize: '11px', color: '#52617A', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Fetching campaign record...</p>
       </div>
     );
   }
 
   if (error || !campaign) {
     return (
-      <div className="db-page space-y-6">
-        <button
-          onClick={() => router.back()}
-          className="db-btn-ghost px-4 py-2 text-xs flex items-center gap-1.5"
-        >
-          <ArrowLeft size={14} /> Back to campaigns
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <button onClick={() => router.back()} className="db-btn-ghost" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '11px', alignSelf: 'flex-start' }}>
+          <ArrowLeft size={13} /> Back to campaigns
         </button>
-        <div className="db-card p-12 text-center max-w-lg mx-auto space-y-4">
-          <div className="w-16 h-16 rounded-full bg-rose-500/10 text-rose-500 flex items-center justify-center mx-auto">
-            <X size={32} />
+        <div style={{ backgroundColor: '#ffffff', border: '1px solid rgba(17,35,59,0.10)', padding: '60px 40px', textAlign: 'center', maxWidth: '480px', margin: '0 auto' }}>
+          <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', color: '#ef4444' }}>
+            <X size={24} />
           </div>
-          <h2 className="text-xl font-bold text-slate-100">Details Unavailable</h2>
-          <p className="text-sm text-muted-foreground">{error || 'Campaign details could not be retrieved.'}</p>
-          <Link href="/dashboard/campaigns" className="db-btn-primary mt-4">
-            Campaign Overview
-          </Link>
+          <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#11233B', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', marginBottom: '8px' }}>Details Unavailable</h2>
+          <p style={{ fontSize: '12px', color: '#52617A', marginBottom: '24px' }}>{error || 'Campaign details could not be retrieved.'}</p>
+          <Link href="/dashboard/campaigns" className="db-btn-primary" style={{ display: 'inline-flex', fontSize: '11px' }}>Campaign Overview</Link>
         </div>
       </div>
     );
   }
 
-  // Check if this is a raw campaign request or an offer
   const isRequest = !campaign.adConfig && !!campaign.adFormat;
-  const statusColor =
-    campaign.status === 'active' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
-    campaign.status === 'pending' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
-    'bg-slate-500/10 text-slate-400 border border-slate-500/20';
-
-  const previewImage = isRequest 
-    ? campaign.adFormat?.imageUrl 
-    : campaign.assets?.referenceImages?.[0];
+  const statusColors: Record<string, { bg: string; color: string; border: string }> = {
+    active: { bg: 'rgba(16,185,129,0.08)', color: '#10b981', border: 'rgba(16,185,129,0.2)' },
+    pending: { bg: 'rgba(255,179,0,0.08)', color: '#FFB300', border: 'rgba(255,179,0,0.2)' },
+    draft: { bg: 'rgba(82,97,122,0.08)', color: '#52617A', border: 'rgba(82,97,122,0.15)' },
+  };
+  const sc = statusColors[campaign.status || 'draft'] || statusColors.draft;
+  const previewImage = isRequest ? campaign.adFormat?.imageUrl : campaign.assets?.referenceImages?.[0];
 
   return (
-    <div className="db-page space-y-8 pb-12">
+    <div className="db-page" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="space-y-1">
-          <button
-            onClick={() => router.back()}
-            className="text-xs text-muted-foreground hover:text-slate-100 flex items-center gap-1.5 transition-colors mb-2"
-          >
-            <ArrowLeft size={12} /> Back to Campaigns
-          </button>
-          <div className="flex items-center gap-3 flex-wrap">
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-50">{campaign.title}</h1>
-            <span className={`db-chip uppercase ${statusColor}`}>
-              {campaign.status}
-            </span>
+      <div>
+        <button onClick={() => router.back()} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '10px', color: '#52617A', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.08em', background: 'none', border: 'none', cursor: 'pointer', marginBottom: '14px', fontWeight: 700 }}>
+          <ArrowLeft size={12} /> Back to Campaigns
+        </button>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '6px' }}>
+              <h1 style={{ fontSize: '24px', fontWeight: 900, color: '#11233B', textTransform: 'uppercase', letterSpacing: '-0.01em', fontFamily: 'var(--font-space)' }}>{campaign.title}</h1>
+              <span style={{ fontSize: '8px', fontWeight: 700, fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.1em', padding: '3px 10px', backgroundColor: sc.bg, color: sc.color, border: `1px solid ${sc.border}` }}>
+                {campaign.status}
+              </span>
+            </div>
+            <p style={{ fontSize: '10px', color: '#52617A', fontFamily: 'var(--font-mono)' }}>ID: {campaign.id}</p>
           </div>
-          <p className="text-xs text-muted-foreground font-mono">ID: {campaign.id}</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-        {/* Main Details Panel */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="db-card p-6 lg:p-8 space-y-6">
-            <h3 className="text-lg font-semibold text-slate-100 border-b border-white/5 pb-3">Deployment Specifications</h3>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm">
-              <div className="space-y-1">
-                <span className="text-muted-foreground block text-xs">AD FORMAT / PRODUCT</span>
-                <span className="font-medium text-slate-200">{isRequest ? campaign.adFormat?.name : campaign.adConfig?.adType || 'Retail Media'}</span>
-              </div>
-              <div className="space-y-1">
-                <span className="text-muted-foreground block text-xs">SIZE / DIMENSIONS</span>
-                <span className="font-medium text-slate-200">{isRequest ? campaign.adSize : campaign.placementType || 'Standard placement'}</span>
-              </div>
-              <div className="space-y-1">
-                <span className="text-muted-foreground block text-xs">OUTLETS SHORTLISTED</span>
-                <span className="font-medium text-slate-200 inline-flex items-center gap-1.5">
-                  <Store size={15} className="text-amber-400" />
-                  {isRequest ? campaign.outletCount : 'Multi-outlet deployment'}
-                </span>
-              </div>
-              <div className="space-y-1">
-                <span className="text-muted-foreground block text-xs">TIMELINE</span>
-                <span className="font-medium text-slate-200 inline-flex items-center gap-1.5">
-                  <Clock size={15} className="text-amber-400" />
-                  {isRequest ? campaign.timeline : 'Ongoing campaign'}
-                </span>
-              </div>
-            </div>
+      {/* Main 2-col grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '20px', alignItems: 'start' }}>
 
-            {isRequest && campaign.retailTypes && (
-              <div className="space-y-2 pt-2">
-                <span className="text-muted-foreground block text-xs">TARGET RETAIL CHANNELS</span>
-                <div className="flex flex-wrap gap-1.5">
-                  {campaign.retailTypes.map((type) => (
-                    <span key={type} className="db-chip bg-white/5 border border-white/10 text-slate-300">
-                      {type}
-                    </span>
-                  ))}
+        {/* Left: detail cards */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+
+          {/* Deployment Specs */}
+          <div style={{ backgroundColor: '#ffffff', border: '1px solid rgba(17,35,59,0.10)', padding: '28px 32px' }}>
+            <h3 style={{ fontSize: '13px', fontWeight: 700, color: '#11233B', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: 'var(--font-mono)', marginBottom: '20px', paddingBottom: '14px', borderBottom: '1px solid rgba(17,35,59,0.08)' }}>Deployment Specifications</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px' }}>
+              <div>
+                <LABEL>Ad Format / Product</LABEL>
+                <VALUE>{isRequest ? campaign.adFormat?.name : campaign.adConfig?.adType || 'Retail Media'}</VALUE>
+              </div>
+              <div>
+                <LABEL>Size / Dimensions</LABEL>
+                <VALUE>{isRequest ? campaign.adSize : campaign.placementType || 'Standard placement'}</VALUE>
+              </div>
+              <div>
+                <LABEL>Outlets Shortlisted</LABEL>
+                <VALUE>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Store size={13} style={{ color: '#FFB300' }} />
+                    {isRequest ? campaign.outletCount : 'Multi-outlet deployment'}
+                  </span>
+                </VALUE>
+              </div>
+              <div>
+                <LABEL>Timeline</LABEL>
+                <VALUE>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Clock size={13} style={{ color: '#FFB300' }} />
+                    {isRequest ? campaign.timeline : 'Ongoing campaign'}
+                  </span>
+                </VALUE>
+              </div>
+              <div style={{ gridColumn: '1 / -1' }}>
+                <LABEL>Geographic Targets</LABEL>
+                <VALUE>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <MapPin size={13} style={{ color: '#FFB300' }} />
+                    {campaign.location}
+                  </span>
+                </VALUE>
+              </div>
+              {isRequest && campaign.retailTypes && (
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <LABEL>Target Retail Channels</LABEL>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '4px' }}>
+                    {campaign.retailTypes.map((type) => (
+                      <span key={type} style={{ fontSize: '10px', fontWeight: 600, fontFamily: 'var(--font-mono)', textTransform: 'uppercase', padding: '4px 10px', backgroundColor: '#F1EFE6', border: '1px solid rgba(17,35,59,0.10)', color: '#52617A' }}>{type}</span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
-
-            <div className="space-y-2 pt-2">
-              <span className="text-muted-foreground block text-xs">GEOGRAPHIC TARGETS</span>
-              <span className="font-medium text-slate-200 inline-flex items-center gap-1.5">
-                <MapPin size={15} className="text-amber-400" />
-                {campaign.location}
-              </span>
+              )}
+              {isRequest && campaign.campaignObjective && (
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <LABEL>Campaign Objective</LABEL>
+                  <p style={{ fontSize: '12px', color: '#11233B', backgroundColor: '#F1EFE6', border: '1px solid rgba(17,35,59,0.08)', padding: '12px 14px', lineHeight: 1.6, fontFamily: 'var(--font-mono)' }}>{campaign.campaignObjective}</p>
+                </div>
+              )}
             </div>
-
-            {isRequest && campaign.campaignObjective && (
-              <div className="space-y-2 pt-2">
-                <span className="text-muted-foreground block text-xs">CAMPAIGN OBJECTIVE</span>
-                <p className="text-slate-300 bg-white/5 rounded-lg p-3 text-xs leading-relaxed border border-white/5">
-                  {campaign.campaignObjective}
-                </p>
-              </div>
-            )}
           </div>
 
-          {/* Custom Material Details if applicable */}
+          {/* Custom Material */}
           {isRequest && campaign.useCustomMaterial && (
-            <div className="db-card p-6 lg:p-8 space-y-4">
-              <h3 className="text-lg font-semibold text-slate-100 flex items-center gap-2">
-                <FileText size={18} className="text-amber-400" /> Custom Collateral Management
+            <div style={{ backgroundColor: '#ffffff', border: '1px solid rgba(17,35,59,0.10)', padding: '28px 32px' }}>
+              <h3 style={{ fontSize: '13px', fontWeight: 700, color: '#11233B', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: 'var(--font-mono)', marginBottom: '20px', paddingBottom: '14px', borderBottom: '1px solid rgba(17,35,59,0.08)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <FileText size={13} style={{ color: '#FFB300' }} /> Custom Collateral Management
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs bg-white/5 p-4 rounded-xl border border-white/10">
-                <div className="space-y-1">
-                  <span className="text-muted-foreground block">MATERIAL SPECIFICATION</span>
-                  <span className="font-medium text-slate-200">{campaign.customMaterialDetails}</span>
-                </div>
-                <div className="space-y-1">
-                  <span className="text-muted-foreground block">WAREHOUSE PICKUP LOCATION</span>
-                  <span className="font-medium text-slate-200">{campaign.pickupLocation}</span>
-                </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div><LABEL>Material Specification</LABEL><VALUE>{campaign.customMaterialDetails}</VALUE></div>
+                <div><LABEL>Warehouse Pickup Location</LABEL><VALUE>{campaign.pickupLocation}</VALUE></div>
               </div>
             </div>
           )}
 
+          {/* Assignment & Execution */}
           {isRequest && (campaign.assignedAgentName || campaign.executionStatus) && (
-            <div className="db-card p-6 lg:p-8 space-y-4">
-              <h3 className="text-lg font-semibold text-slate-100 flex items-center gap-2">
-                <Layers size={18} className="text-amber-400" /> Assignment & Execution
+            <div style={{ backgroundColor: '#ffffff', border: '1px solid rgba(17,35,59,0.10)', padding: '28px 32px' }}>
+              <h3 style={{ fontSize: '13px', fontWeight: 700, color: '#11233B', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: 'var(--font-mono)', marginBottom: '20px', paddingBottom: '14px', borderBottom: '1px solid rgba(17,35,59,0.08)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Layers size={13} style={{ color: '#FFB300' }} /> Assignment & Execution
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs bg-white/5 p-4 rounded-xl border border-white/10">
-                <div className="space-y-1">
-                  <span className="text-muted-foreground block">ASSIGNED AGENT</span>
-                  <span className="font-medium text-slate-200">{campaign.assignedAgentName || 'Pending'}</span>
-                </div>
-                <div className="space-y-1">
-                  <span className="text-muted-foreground block">EXECUTION STATUS</span>
-                  <span className="font-medium text-amber-300 uppercase">{campaign.executionStatus || 'pending'}</span>
-                </div>
-                <div className="space-y-1">
-                  <span className="text-muted-foreground block">PRINT RESPONSIBILITY</span>
-                  <span className="font-medium text-slate-200">{campaign.printResponsibility || 'Not specified'}</span>
-                </div>
-                <div className="space-y-1">
-                  <span className="text-muted-foreground block">MATERIAL SOURCE</span>
-                  <span className="font-medium text-slate-200">{campaign.materialSource || 'Not specified'}</span>
-                </div>
-                <div className="space-y-1">
-                  <span className="text-muted-foreground block">PICKUP CONTACT</span>
-                  <span className="font-medium text-slate-200">
-                    {campaign.pickupContactName || 'N/A'} {campaign.pickupContactPhone ? `(${campaign.pickupContactPhone})` : ''}
-                  </span>
-                </div>
-                <div className="space-y-1">
-                  <span className="text-muted-foreground block">PICKUP WINDOW</span>
-                  <span className="font-medium text-slate-200">{campaign.pickupWindow || 'N/A'}</span>
-                </div>
-                <div className="space-y-1">
-                  <span className="text-muted-foreground block">RETAILER PAYOUT / INSTALL</span>
-                  <span className="font-medium text-slate-200">
-                    {typeof campaign.retailerPayoutPerInstall === 'number'
-                      ? `₹${campaign.retailerPayoutPerInstall}`
-                      : 'Not specified'}
-                  </span>
-                </div>
-                <div className="space-y-1">
-                  <span className="text-muted-foreground block">AGENT COMMISSION / INSTALL</span>
-                  <span className="font-medium text-slate-200">
-                    {typeof campaign.agentCommissionPerInstall === 'number'
-                      ? `₹${campaign.agentCommissionPerInstall}`
-                      : 'Not specified'}
-                  </span>
-                </div>
-                <div className="space-y-1">
-                  <span className="text-muted-foreground block">PAYOUT SCHEDULE</span>
-                  <span className="font-medium text-slate-200">{campaign.payoutSchedule || 'N/A'}</span>
-                </div>
-                <div className="space-y-1">
-                  <span className="text-muted-foreground block">PAYOUT RUN DATE</span>
-                  <span className="font-medium text-slate-200">{campaign.payoutRunDate || 'N/A'}</span>
-                </div>
-                <div className="space-y-1">
-                  <span className="text-muted-foreground block">INSTALL BY DATE</span>
-                  <span className="font-medium text-slate-200">{campaign.installByDate || 'N/A'}</span>
-                </div>
-                <div className="space-y-1">
-                  <span className="text-muted-foreground block">TARGET RETAILER PROFILE</span>
-                  <span className="font-medium text-slate-200">{campaign.targetRetailerProfile || 'N/A'}</span>
-                </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', backgroundColor: '#F1EFE6', border: '1px solid rgba(17,35,59,0.06)', padding: '20px' }}>
+                {[
+                  { label: 'Assigned Agent', value: campaign.assignedAgentName || 'Pending' },
+                  { label: 'Execution Status', value: campaign.executionStatus || 'pending' },
+                  { label: 'Print Responsibility', value: campaign.printResponsibility || 'Not specified' },
+                  { label: 'Material Source', value: campaign.materialSource || 'Not specified' },
+                  { label: 'Pickup Contact', value: `${campaign.pickupContactName || 'N/A'}${campaign.pickupContactPhone ? ` (${campaign.pickupContactPhone})` : ''}` },
+                  { label: 'Pickup Window', value: campaign.pickupWindow || 'N/A' },
+                  { label: 'Retailer Payout / Install', value: typeof campaign.retailerPayoutPerInstall === 'number' ? `$${campaign.retailerPayoutPerInstall} CAD` : 'Not specified' },
+                  { label: 'Agent Commission / Install', value: typeof campaign.agentCommissionPerInstall === 'number' ? `$${campaign.agentCommissionPerInstall} CAD` : 'Not specified' },
+                  { label: 'Payout Schedule', value: campaign.payoutSchedule || 'N/A' },
+                  { label: 'Payout Run Date', value: campaign.payoutRunDate || 'N/A' },
+                  { label: 'Install By Date', value: campaign.installByDate || 'N/A' },
+                  { label: 'Target Retailer Profile', value: campaign.targetRetailerProfile || 'N/A' },
+                ].map(({ label, value }) => (
+                  <div key={label}><LABEL>{label}</LABEL><VALUE>{value}</VALUE></div>
+                ))}
               </div>
               {campaign.placementInstructions && (
-                <div className="text-xs bg-white/5 border border-white/10 rounded-lg p-4">
-                  <span className="text-muted-foreground block mb-1">PLACEMENT INSTRUCTIONS</span>
-                  <p className="text-slate-200 leading-relaxed">{campaign.placementInstructions}</p>
+                <div style={{ marginTop: '16px' }}>
+                  <LABEL>Placement Instructions</LABEL>
+                  <p style={{ fontSize: '12px', color: '#11233B', backgroundColor: '#F1EFE6', border: '1px solid rgba(17,35,59,0.08)', padding: '14px', lineHeight: 1.7, fontFamily: 'var(--font-mono)', marginTop: '6px' }}>{campaign.placementInstructions}</p>
                 </div>
               )}
             </div>
           )}
 
-          {/* Campaign status explanation */}
-          <div className="db-card p-6 flex items-start gap-4">
-            <div className="p-3 bg-amber-500/10 text-amber-400 rounded-xl">
-              <Clock size={20} />
+          {/* Review & Deployment info */}
+          <div style={{ backgroundColor: '#ffffff', border: '1px solid rgba(17,35,59,0.10)', padding: '22px 28px', display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
+            <div style={{ width: '40px', height: '40px', flexShrink: 0, backgroundColor: 'rgba(255,179,0,0.08)', border: '1px solid rgba(255,179,0,0.15)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFB300' }}>
+              <Clock size={18} />
             </div>
-            <div className="space-y-1.5">
-              <h4 className="font-semibold text-slate-100">Review & Deployment Process</h4>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                AdMesh deployment engineers are shortlisting store availability matching your filters. You will receive an email confirmation and notification here as soon as rollout plans are generated.
+            <div>
+              <h4 style={{ fontSize: '12px', fontWeight: 700, color: '#11233B', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', marginBottom: '6px' }}>Review & Deployment Process</h4>
+              <p style={{ fontSize: '11px', color: '#52617A', lineHeight: 1.7, fontFamily: 'var(--font-mono)' }}>
+                AdMesh deployment engineers are shortlisting store availability matching your filters. You will receive an email confirmation as soon as rollout plans are generated.
               </p>
             </div>
           </div>
 
+          {/* Admin Response */}
           {isRequest && campaign.adminResponse && (
-            <div className="db-card p-6 space-y-2">
-              <h4 className="font-semibold text-slate-100 flex items-center gap-2">
-                <CheckCircle size={16} className="text-emerald-400" /> Admin Response
+            <div style={{ backgroundColor: '#ffffff', border: '1px solid rgba(17,35,59,0.10)', padding: '24px 28px' }}>
+              <h4 style={{ fontSize: '12px', fontWeight: 700, color: '#11233B', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <CheckCircle size={13} style={{ color: '#10b981' }} /> Admin Response
               </h4>
-              <p className="text-sm text-slate-300 leading-relaxed bg-white/5 p-3 rounded-lg border border-white/10">
-                {campaign.adminResponse}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Updated:{' '}
-                {campaign.reviewedAt?.seconds
-                  ? new Date(campaign.reviewedAt.seconds * 1000).toLocaleString()
-                  : 'Recently'}
-              </p>
+              <p style={{ fontSize: '12px', color: '#11233B', backgroundColor: '#F1EFE6', border: '1px solid rgba(17,35,59,0.08)', padding: '14px', lineHeight: 1.7, marginBottom: '8px', fontFamily: 'var(--font-mono)' }}>{campaign.adminResponse}</p>
+              <p style={{ fontSize: '10px', color: '#52617A', fontFamily: 'var(--font-mono)' }}>Updated: {campaign.reviewedAt?.seconds ? new Date(campaign.reviewedAt.seconds * 1000).toLocaleString() : 'Recently'}</p>
             </div>
           )}
         </div>
 
-        {/* Sidebar Preview */}
-        <div className="space-y-6">
-          <div className="db-card p-4 space-y-4">
-            <h3 className="text-sm font-bold text-slate-300 uppercase tracking-wider ml-1">Format Visual</h3>
-            <div className="aspect-video bg-[#17181B] rounded-xl overflow-hidden border border-white/10 relative">
+        {/* Right: Preview + Metrics */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div style={{ backgroundColor: '#ffffff', border: '1px solid rgba(17,35,59,0.10)', padding: '20px' }}>
+            <p style={{ fontSize: '9px', fontWeight: 700, color: '#52617A', textTransform: 'uppercase', letterSpacing: '0.1em', fontFamily: 'var(--font-mono)', marginBottom: '12px' }}>Format Visual</p>
+            <div style={{ aspectRatio: '16/9', backgroundColor: '#E7E5DB', overflow: 'hidden', border: '1px solid rgba(17,35,59,0.08)', position: 'relative' }}>
               {previewImage ? (
-                <img src={previewImage} alt="Ad Format Preview" className="w-full h-full object-cover" />
+                <img src={previewImage} alt="Ad Format Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-slate-400 text-sm font-bold bg-[radial-gradient(circle_at_center,rgba(201,115,32,0.15),transparent_70%)]">
-                  PREVIEW UNAVAILABLE
+                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '9px', fontWeight: 700, color: 'rgba(17,35,59,0.2)', fontFamily: 'var(--font-mono)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                  Preview Unavailable
                 </div>
               )}
             </div>
           </div>
 
           {!isRequest && (
-            <div className="db-card p-6 space-y-4">
-              <h3 className="text-sm font-bold text-slate-300 uppercase tracking-wider">Live Metrics</h3>
-              <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/5">
-                <span className="text-xs text-muted-foreground">Compliance Rating</span>
-                <span className="font-bold text-emerald-400 flex items-center gap-1">
-                  <ShieldCheck size={14} />
+            <div style={{ backgroundColor: '#ffffff', border: '1px solid rgba(17,35,59,0.10)', padding: '20px' }}>
+              <p style={{ fontSize: '9px', fontWeight: 700, color: '#52617A', textTransform: 'uppercase', letterSpacing: '0.1em', fontFamily: 'var(--font-mono)', marginBottom: '12px' }}>Live Metrics</p>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', backgroundColor: '#F1EFE6', border: '1px solid rgba(17,35,59,0.08)' }}>
+                <span style={{ fontSize: '11px', color: '#52617A', fontFamily: 'var(--font-mono)' }}>Compliance Rating</span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 700, color: '#10b981', fontSize: '13px', fontFamily: 'var(--font-mono)' }}>
+                  <ShieldCheck size={13} />
                   {campaign.performance?.complianceRate || 100}%
                 </span>
               </div>

@@ -359,8 +359,8 @@ const RetailAnalytics = () => {
               
               <div className="space-y-3">
                 <div className="flex items-center justify-between p-2 bg-white/[0.02] rounded-lg">
-                  <span className="text-[9px] mono text-white/40 uppercase">Pincode</span>
-                  <span className="text-[10px] mono text-white/60">400051</span>
+                  <span className="text-[9px] mono text-white/40 uppercase">Postal Code</span>
+                  <span className="text-[10px] mono text-white/60">M5V 2H1</span>
                 </div>
                 <div className="flex items-center justify-between p-2 bg-white/[0.02] rounded-lg">
                   <span className="text-[9px] mono text-white/40 uppercase">Radius</span>
@@ -396,7 +396,7 @@ const RetailAnalytics = () => {
                 </div>
                 <div className="text-center p-3 bg-white/[0.02] rounded-xl">
                   <span className="text-[8px] mono text-white/30 uppercase tracking-wider block mb-1">CPM</span>
-                  <span className="text-lg font-bold text-amber mono">₹12</span>
+                  <span className="text-lg font-bold text-amber mono">$2.50</span>
                 </div>
                 <div className="text-center p-3 bg-white/[0.02] rounded-xl">
                   <span className="text-[8px] mono text-white/30 uppercase tracking-wider block mb-1">ROAS</span>

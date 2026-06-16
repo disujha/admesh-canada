@@ -6,11 +6,9 @@ import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/auth-context';
 import {
   LayoutDashboard,
-  Megaphone,
   FileCheck,
   BarChart2,
   Store,
-  Bot,
   Rocket,
   Users,
   Settings,
@@ -20,8 +18,7 @@ import {
   ChevronRight,
   Menu,
   X,
-  ChevronsLeft,
-  ChevronsRight,
+  HelpCircle,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -34,66 +31,51 @@ type NavItem = {
   match?: (pathname: string) => boolean;
 };
 
-const navGroups: { title: string; items: NavItem[] }[] = [
-  {
-    title: 'Core',
-    items: [
-      { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard', match: (p) => p === '/dashboard' },
-      { label: 'Campaigns', icon: Megaphone, href: '/dashboard/campaigns', match: (p) => p.startsWith('/dashboard/campaigns') },
-      { label: 'Deployments', icon: Rocket, href: '/dashboard/campaigns/new', match: (p) => p === '/dashboard/campaigns/new' },
-      { label: 'Compliance', icon: FileCheck, href: '/dashboard/compliance', match: (p) => p === '/dashboard/compliance' },
-      { label: 'Analytics', icon: BarChart2, href: '/dashboard/analytics', match: (p) => p === '/dashboard/analytics' },
-    ],
-  },
-  {
-    title: 'Intelligence',
-    items: [
-      { label: 'Retail Network', icon: Store, comingSoon: true },
-      { label: 'AI Insights', icon: Bot, comingSoon: true },
-      { label: 'Retailers', icon: Users, comingSoon: true },
-      { label: 'Settings', icon: Settings, comingSoon: true },
-    ],
-  },
+const navItems: NavItem[] = [
+  { label: 'Campaigns', icon: LayoutDashboard, href: '/dashboard', match: (p) => p === '/dashboard' },
+  { label: 'New Campaign', icon: Rocket, href: '/dashboard/campaigns/new', match: (p) => p === '/dashboard/campaigns/new' },
+  { label: 'Compliance Log', icon: FileCheck, href: '/dashboard/compliance', match: (p) => p === '/dashboard/compliance' },
+  { label: 'Retail Network', icon: Store, comingSoon: true },
+  { label: 'Retailers', icon: Users, comingSoon: true },
+  { label: 'Performance', icon: BarChart2, comingSoon: true },
+  { label: 'Account Settings', icon: Settings, comingSoon: true },
 ];
 
 function NavLink({
   item,
   pathname,
-  collapsed,
   onNavigate,
 }: {
   item: NavItem;
   pathname: string;
-  collapsed: boolean;
   onNavigate?: () => void;
 }) {
   const active = item.match ? item.match(pathname) : item.href === pathname;
   const Icon = item.icon;
 
-  const commonClass = `group ${collapsed ? 'w-full justify-center px-0 mx-0' : 'w-full px-4'} min-h-[42px] flex items-center gap-3.5 py-2 rounded-xl transition-all duration-200 ${
-    active
-      ? 'bg-white/8 text-slate-100'
-      : 'text-slate-400 hover:text-slate-100 hover:bg-white/5'
-  }`;
+  const base = 'group w-full h-11 flex items-center gap-3 font-mono text-xs uppercase tracking-wider transition-all duration-150 cursor-pointer';
+  const activeClass = 'bg-[#E7E5DB] text-[#11233B] font-bold border-l-2 border-[#FFB300]';
+  const inactiveClass = 'text-[#52617A] hover:text-[#11233B] hover:bg-[#E7E5DB]/40';
+
+  const style = { paddingLeft: '20px', paddingRight: '16px' };
 
   if (!item.href || item.comingSoon) {
     return (
-      <button type="button" className={`${commonClass} cursor-default`} title={item.label}>
-        <Icon size={20} className={active ? 'text-amber-400' : 'text-slate-500 group-hover:text-slate-300'} />
-        {!collapsed && <span className="text-sm font-medium">{item.label}</span>}
-        {!collapsed && item.comingSoon && (
-          <span className="ml-auto text-[10px] uppercase tracking-wider text-slate-500">Soon</span>
+      <div className={`${base} ${active ? activeClass : inactiveClass} cursor-default`} style={style} title={item.label}>
+        <Icon size={15} className={active ? 'text-[#11233B] shrink-0' : 'text-[#52617A] shrink-0 group-hover:text-[#11233B]'} />
+        <span className="font-semibold truncate flex-1">{item.label}</span>
+        {item.comingSoon && (
+          <span className="shrink-0 text-[7px] font-bold tracking-widest text-[#52617A] bg-[#E7E5DB] border border-[#11233B]/10 px-1.5 py-0.5 uppercase">Soon</span>
         )}
-        {active && !collapsed && <ChevronRight size={14} className="ml-auto text-amber-300" />}
-      </button>
+      </div>
     );
   }
 
   return (
-    <Link href={item.href} onClick={onNavigate} className={commonClass} title={item.label}>
-      <Icon size={20} className={active ? 'text-amber-400' : 'text-slate-500 group-hover:text-slate-300'} />
-      {!collapsed && <span className="text-sm font-medium">{item.label}</span>}
-      {active && !collapsed && <ChevronRight size={14} className="ml-auto text-amber-300" />}
+    <Link href={item.href} onClick={onNavigate} className={`${base} ${active ? activeClass : inactiveClass}`} style={style} title={item.label}>
+      <Icon size={15} className={active ? 'text-[#11233B] shrink-0' : 'text-[#52617A] shrink-0 group-hover:text-[#11233B]'} />
+      <span className="font-semibold truncate flex-1">{item.label}</span>
+      {active && <ChevronRight size={12} className="shrink-0 text-[#11233B]" />}
     </Link>
   );
 }
@@ -101,73 +83,47 @@ function NavLink({
 function SidebarBody({
   pathname,
   profile,
-  collapsed,
   onNavigate,
   onLogout,
 }: {
   pathname: string;
   profile: { displayName?: string | null; role?: string | null } | null;
-  collapsed: boolean;
   onNavigate?: () => void;
   onLogout: () => void;
 }) {
   return (
-    <div className="h-full flex flex-col">
-      <div
-        className={`${collapsed ? 'px-4 py-5' : 'px-6'} border-b border-white/5`}
-        style={collapsed ? undefined : { paddingLeft: '2rem', paddingTop: '1.2rem', paddingBottom: '1.2rem' }}
-      >
-        <Link href="/" onClick={onNavigate} className={`flex min-h-[40px] ${collapsed ? 'justify-center' : 'items-center gap-3.5'}`}>
-          <img src="/icon_transparent.png" alt="AdMesh" className="w-8 h-8 object-contain" />
-          {!collapsed && (
-            <span className="text-[22px] leading-none font-bold tracking-tight text-slate-100">
-              Ad<span className="db-accent">Mesh</span>
-            </span>
-          )}
-        </Link>
-      </div>
-
-      <div
-        className={`${collapsed ? 'px-0 py-4 overflow-y-hidden' : 'px-3 py-5 overflow-y-auto'} flex-grow space-y-4`}
-        style={collapsed ? undefined : { paddingLeft: '2rem' }}
-      >
-        {navGroups.map((group) => (
-          <div key={group.title} className="space-y-1.5">
-            {group.items.map((item) => (
-              <NavLink
-                key={item.label}
-                item={item}
-                pathname={pathname}
-                collapsed={collapsed}
-                onNavigate={onNavigate}
-              />
-            ))}
-          </div>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', paddingTop: '20px', paddingBottom: '16px' }}>
+      {/* Nav links */}
+      <nav style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+        {navItems.map((item) => (
+          <NavLink key={item.label} item={item} pathname={pathname} onNavigate={onNavigate} />
         ))}
-      </div>
+      </nav>
 
-      <div className={`${collapsed ? 'p-2' : 'p-4'} border-t border-white/5`}>
-        <div className={`${collapsed ? 'p-2 flex flex-col items-center' : 'p-4'} rounded-xl bg-white/5 border border-white/10`}>
-          <div className={`flex items-center min-w-0 ${collapsed ? 'justify-center mb-2' : 'gap-3.5 mb-3.5'}`}>
-            <div className="w-10 h-10 rounded-lg bg-[rgba(201,115,32,0.2)] db-accent flex items-center justify-center font-semibold shrink-0">
-              {(profile?.displayName || 'U').charAt(0)}
-            </div>
-            {!collapsed && (
-              <div className="min-w-0">
-                <p className="text-sm font-semibold text-slate-100 truncate max-w-[160px]">{profile?.displayName || 'User'}</p>
-                <p className="text-xs text-slate-500 truncate">{profile?.role || 'brand_account'}</p>
+      {/* User profile card */}
+      <div style={{ margin: '0 12px' }}>
+        <Link href="/dashboard/profile" style={{ textDecoration: 'none', display: 'block' }} onClick={onNavigate}>
+          <div className="bg-[#E7E5DB]/60 border border-[#11233B]/10 font-mono hover:bg-[#E7E5DB] transition-all cursor-pointer" style={{ padding: '12px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
+              <div className="bg-[#11233B] text-[#F1EFE6] font-bold text-xs shrink-0 rounded-full flex items-center justify-center" style={{ width: '28px', height: '28px' }}>
+                {(profile?.displayName || 'U').charAt(0)}
               </div>
-            )}
+              <div style={{ minWidth: 0 }}>
+                <p className="font-bold text-[#11233B] uppercase truncate" style={{ fontSize: '10px', lineHeight: '1.2', marginBottom: '2px' }}>{profile?.displayName || 'User'}</p>
+                <p className="text-[#52617A] uppercase tracking-wider truncate" style={{ fontSize: '9px', lineHeight: '1.2' }}>{profile?.role || 'brand_account'}</p>
+              </div>
+            </div>
           </div>
-          <button
-            onClick={onLogout}
-            className={`${collapsed ? 'w-10 h-10 p-0 self-center' : 'w-full py-2.5'} inline-flex items-center justify-center gap-2 rounded-lg text-xs font-semibold text-rose-200 bg-rose-500/12 hover:bg-rose-500/18 transition-colors`}
-            aria-label="Logout"
-          >
-            <LogOut size={collapsed ? 16 : 14} />
-            {!collapsed && 'Logout'}
-          </button>
-        </div>
+        </Link>
+        <button
+          onClick={onLogout}
+          className="w-full text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 uppercase tracking-wider font-bold transition-colors cursor-pointer inline-flex items-center justify-center gap-1.5"
+          style={{ padding: '6px 0', fontSize: '9px', marginTop: '8px' }}
+          aria-label="Logout"
+        >
+          <LogOut size={10} />
+          <span>Logout</span>
+        </button>
       </div>
     </div>
   );
@@ -178,7 +134,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { profile, logout, loading } = useAuth();
   const [isMobile, setIsMobile] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
 
   React.useEffect(() => {
     const mediaQuery = window.matchMedia('(max-width: 1023px)');
@@ -186,7 +142,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       const mobile = mediaQuery.matches;
       setIsMobile(mobile);
       setIsSidebarOpen(false);
-      if (mobile) setCollapsed(false);
     };
     applyLayout();
     mediaQuery.addEventListener('change', applyLayout);
@@ -200,89 +155,194 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0B0C0F]">
-        <div className="w-10 h-10 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-[#F1EFE6]">
+        <div className="w-6 h-6 border-2 border-[#11233B] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
-  const desktopSidebarWidthPx = collapsed ? 96 : 232;
-
   return (
-    <div className="dashboard-shell min-h-screen bg-[#0f1114] text-slate-100 flex overflow-x-hidden">
-      <aside
-        className="hidden lg:flex bg-[#14171b] border-r border-white/10 flex-col h-screen fixed left-0 top-0 z-40 transition-all duration-300"
-        style={{ width: `${desktopSidebarWidthPx}px` }}
+    <div className="dashboard-shell" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#F1EFE6', overflow: 'hidden' }}>
+
+      {/* ── Top Application Header ── */}
+      <header
+        className="bg-[#F1EFE6] border-b border-[#11233B]/10"
+        style={{ height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 24px', position: 'sticky', top: 0, zIndex: 30, flexShrink: 0 }}
       >
-        <SidebarBody pathname={pathname} profile={profile} collapsed={collapsed} onLogout={logout} />
-      </aside>
+        {/* Left: Hamburger + Logo */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
+          {isMobile && (
+            <button
+              onClick={() => setIsSidebarOpen((v) => !v)}
+              className="border border-[#11233B]/15 text-[#11233B] hover:bg-[#E7E5DB] transition-colors"
+              style={{ padding: '8px' }}
+              aria-label="Toggle sidebar"
+            >
+              {isSidebarOpen ? <X size={15} /> : <Menu size={15} />}
+            </button>
+          )}
+          <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <img src="/icon_transparent.png" alt="AdMesh" style={{ width: '24px', height: '24px', objectFit: 'contain' }} />
+            <span className="font-mono font-bold text-[#11233B] uppercase" style={{ fontSize: '13px', letterSpacing: '0.18em' }}>AdMesh</span>
+          </Link>
+        </div>
 
-      {isMobile && isSidebarOpen && (
-        <button
-          type="button"
-          aria-label="Close sidebar"
-          className="fixed inset-0 bg-black/60 backdrop-blur-[2px] z-40"
-          onClick={() => setIsSidebarOpen(false)}
-        />
-      )}
-
-      <AnimatePresence>
-        {isMobile && isSidebarOpen && (
-          <motion.aside
-            initial={{ x: -320, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: -320, opacity: 0 }}
-            className="w-56 bg-[#14171b] border-r border-white/10 flex flex-col fixed top-0 left-0 h-screen z-50"
-          >
-            <SidebarBody
-              pathname={pathname}
-              profile={profile}
-              collapsed={false}
-              onNavigate={() => setIsSidebarOpen(false)}
-              onLogout={logout}
+        {/* Centre: Search bar */}
+        <div className="hidden md:block" style={{ flex: 1, maxWidth: '440px', margin: '0 24px' }}>
+          <div style={{ position: 'relative' }}>
+            <Search className="text-[#52617A] pointer-events-none" size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+            <input
+              type="text"
+              placeholder="Search campaigns, cities, retailers..."
+              className="bg-[#E7E5DB]/60 border border-[#11233B]/15 text-[#11233B] font-mono focus:outline-none focus:border-[#11233B] focus:bg-white transition-all w-full"
+              style={{ height: '38px', fontSize: '11px', paddingLeft: '36px', paddingRight: '16px' }}
             />
-          </motion.aside>
+          </div>
+        </div>
+
+        {/* Right: Icons + Avatar */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+          <button
+            onClick={() => setIsHelpOpen(true)}
+            className="text-[#11233B] hover:bg-[#E7E5DB] transition-all"
+            style={{ padding: '8px', background: 'none', border: 'none', cursor: 'pointer' }}
+            title="Help"
+          >
+            <HelpCircle size={16} />
+          </button>
+          <button className="text-[#11233B] hover:bg-[#E7E5DB] transition-all" style={{ padding: '8px', position: 'relative', background: 'none', border: 'none', cursor: 'pointer' }} title="Notifications">
+            <Bell size={16} />
+            <span className="rounded-full bg-[#FFB300]" style={{ position: 'absolute', top: '6px', right: '6px', width: '6px', height: '6px' }} />
+          </button>
+          <Link
+            href="/dashboard/profile"
+            className="bg-[#11233B] text-[#F1EFE6] font-mono font-bold rounded-full flex items-center justify-center shrink-0"
+            style={{ width: '32px', height: '32px', fontSize: '11px', textDecoration: 'none' }}
+          >
+            {(profile?.displayName || 'U').charAt(0)}
+          </Link>
+        </div>
+      </header>
+
+      {/* ── Body row: Sidebar + Main ── */}
+      <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+
+        {/* Desktop Sidebar */}
+        <aside
+          className="hidden lg:flex flex-col bg-white border-r border-[#11233B]/10"
+          style={{ width: '240px', flexShrink: 0, overflowY: 'auto' }}
+        >
+          <SidebarBody pathname={pathname} profile={profile} onLogout={logout} />
+        </aside>
+
+        {/* Mobile Sidebar */}
+        <AnimatePresence>
+          {isMobile && isSidebarOpen && (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(10,26,44,0.25)', backdropFilter: 'blur(2px)', zIndex: 40 }}
+                onClick={() => setIsSidebarOpen(false)}
+              />
+              <motion.aside
+                initial={{ x: -240 }}
+                animate={{ x: 0 }}
+                exit={{ x: -240 }}
+                transition={{ type: 'spring', damping: 28, stiffness: 260 }}
+                className="flex flex-col bg-white border-r border-[#11233B]/10"
+                style={{ position: 'fixed', top: '64px', bottom: 0, left: 0, width: '220px', zIndex: 50, overflowY: 'auto', boxShadow: '4px 0 20px rgba(0,0,0,0.08)' }}
+              >
+                <SidebarBody pathname={pathname} profile={profile} onNavigate={() => setIsSidebarOpen(false)} onLogout={logout} />
+              </motion.aside>
+            </>
+          )}
+        </AnimatePresence>
+
+        {/* ── Main workspace content area ── */}
+        <main
+          className="flex-1"
+          style={{ overflowY: 'auto', backgroundColor: '#F1EFE6' }}
+        >
+          {/* Content wrapper — padding applied here via inline style, guaranteed to render */}
+          <div style={{ padding: '40px 48px 64px 48px', maxWidth: '1280px', width: '100%' }}>
+            {children}
+          </div>
+        </main>
+
+      </div>
+
+      {/* Help Side Sheet Panel */}
+      <AnimatePresence>
+        {isHelpOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(10,26,44,0.25)', backdropFilter: 'blur(2px)', zIndex: 100 }}
+              onClick={() => setIsHelpOpen(false)}
+            />
+            {/* Sheet */}
+            <motion.div
+              initial={{ x: 380 }}
+              animate={{ x: 0 }}
+              exit={{ x: 380 }}
+              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              style={{
+                position: 'fixed', top: 0, right: 0, bottom: 0, width: '380px', maxWidth: '100%',
+                backgroundColor: '#ffffff', borderLeft: '1px solid rgba(17,35,59,0.10)',
+                boxShadow: '-4px 0 20px rgba(0,0,0,0.08)', zIndex: 101, display: 'flex', flexDirection: 'column',
+                fontFamily: 'var(--font-mono)'
+              }}
+            >
+              {/* Header */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px', borderBottom: '1px solid rgba(17,35,59,0.10)' }}>
+                <h3 style={{ fontSize: '13px', fontWeight: 700, color: '#11233B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Support & Help</h3>
+                <button
+                  onClick={() => setIsHelpOpen(false)}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#11233B' }}
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              {/* Content */}
+              <div style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                <div>
+                  <h4 style={{ fontSize: '11px', fontWeight: 700, color: '#11233B', textTransform: 'uppercase', marginBottom: '8px' }}>FAQs</h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {[
+                      { q: 'How is compliance verified?', a: 'Every campaign placement requires a verification photo uploaded by either store operators or checked by field agents, processed by our AI verification suite.' },
+                      { q: 'What is Province Coverage?', a: 'Province Performance shows impressions split by province where screens and placements are active.' },
+                      { q: 'How to download invoice?', a: 'Invoices are sent to the registered email address upon campaign launch. You can also view them under Billing.' }
+                    ].map((item, i) => (
+                      <div key={i} style={{ padding: '12px', backgroundColor: '#F1EFE6', border: '1px solid rgba(17,35,59,0.08)' }}>
+                        <p style={{ fontSize: '11px', fontWeight: 700, color: '#11233B', marginBottom: '4px' }}>{item.q}</p>
+                        <p style={{ fontSize: '10px', color: '#52617A', lineHeight: '1.4' }}>{item.a}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div style={{ borderTop: '1px solid rgba(17,35,59,0.08)', paddingTop: '20px' }}>
+                  <h4 style={{ fontSize: '11px', fontWeight: 700, color: '#11233B', textTransform: 'uppercase', marginBottom: '8px' }}>Contact Support</h4>
+                  <p style={{ fontSize: '11px', color: '#52617A', marginBottom: '12px', lineHeight: '1.4' }}>
+                    Need extra assistance with your retail campaign or distributor onboarding? Contact us:
+                  </p>
+                  <div style={{ padding: '12px', border: '1px solid rgba(17,35,59,0.1)', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <p style={{ fontSize: '11px', fontWeight: 600, color: '#11233B' }}>Email: support@admesh.ca</p>
+                    <p style={{ fontSize: '11px', fontWeight: 600, color: '#11233B' }}>Phone: +1 (800) 555-MESH</p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
 
-      <main
-        className="flex-grow flex flex-col min-w-0 w-full"
-        style={{ marginLeft: isMobile ? 0 : `${desktopSidebarWidthPx + 16}px` }}
-      >
-        <header className="h-16 lg:h-20 bg-[#0f1114]/90 backdrop-blur-md border-b border-white/10 px-7 lg:px-10 xl:px-12 flex items-center justify-between sticky top-0 z-30">
-          <div className="flex items-center gap-4 lg:gap-5 min-w-0">
-            <button
-              onClick={() => (isMobile ? setIsSidebarOpen((v) => !v) : setCollapsed((v) => !v))}
-              className="p-2 rounded-lg border border-white/10 text-slate-300 hover:bg-white/5 hover:text-white transition-colors"
-              aria-label="Toggle sidebar"
-            >
-              {isMobile ? (isSidebarOpen ? <X size={18} /> : <Menu size={18} />) : collapsed ? <ChevronsRight size={18} /> : <ChevronsLeft size={18} />}
-            </button>
-            <div className="relative min-w-0 hidden sm:block">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" size={16} />
-              <input
-                type="text"
-                placeholder="Search campaigns, retailers, insights..."
-                className="db-input w-[240px] lg:w-[380px] pl-14 pr-4"
-                style={{ paddingLeft: '3.25rem' }}
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4 lg:gap-5">
-            <button className="relative p-2 rounded-lg border border-white/10 text-slate-300 hover:bg-white/5 hover:text-white transition-colors">
-              <Bell size={18} />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full db-accent-bg shadow-[0_0_10px_rgba(201,115,32,0.9)]" />
-            </button>
-            <div className="hidden sm:flex items-center gap-3 pl-2">
-              <span className="text-sm font-medium text-slate-200 truncate max-w-[180px]">{profile?.displayName}</span>
-              <img src="/icon_transparent.png" alt="User" className="w-8 h-8 object-contain" />
-            </div>
-          </div>
-        </header>
-
-        <div className="p-7 lg:p-9 xl:p-12 w-full max-w-[1540px] mx-auto">{children}</div>
-      </main>
     </div>
   );
 }

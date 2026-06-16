@@ -63,122 +63,121 @@ const ComplianceView = () => {
 
   return (
     <div className="db-page">
-      <div>
-        <h1 className="db-heading">Compliance & Proof</h1>
-        <p className="text-muted-foreground">Monitor real-time verification logs and proof images for your campaigns.</p>
+      {/* Page Header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+        <div>
+          <h1 style={{ fontSize: '28px', fontWeight: 900, color: '#11233B', textTransform: 'uppercase', letterSpacing: '-0.02em', fontFamily: 'var(--font-space)', marginBottom: '4px' }}>Compliance & Proof</h1>
+          <p style={{ fontSize: '11px', color: '#52617A', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Monitor real-time verification logs and proof images for your campaigns.</p>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-        <div className="xl:col-span-2 space-y-6">
-          <div className="db-card p-8">
-            <h2 className="text-xl font-bold mb-6">Live Verification Feed</h2>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '24px', alignItems: 'start' }}>
+        {/* Left: Live Feed */}
+        <div style={{ backgroundColor: '#ffffff', border: '1px solid rgba(17,35,59,0.10)', padding: '32px 36px' }}>
+          <h2 style={{ fontSize: '15px', fontWeight: 700, color: '#11233B', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: 'var(--font-mono)', marginBottom: '24px', paddingBottom: '16px', borderBottom: '1px solid rgba(17,35,59,0.08)' }}>Live Verification Feed</h2>
 
-            {loading ? (
-              <div className="py-20 flex justify-center"><div className="w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin" /></div>
-            ) : logs.length === 0 ? (
-              <div className="py-20 text-center text-muted-foreground">
-                <FileCheck size={48} className="mx-auto mb-4 opacity-10" />
-                <p>No compliance logs available yet.</p>
-              </div>
-            ) : (
-              <div className="space-y-8">
-                {logs.map((log, i) => (
-                  <motion.div
-                    key={log.id}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.05 }}
-                    className="flex gap-6 pb-8 border-b border-white/5 last:border-0"
-                  >
-                    <div className="flex-shrink-0">
-                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                        log.status === 'verified' ? 'bg-green-500/15 text-green-400' : 'bg-amber-500/15 text-amber-300'
-                      }`}>
-                        {log.status === 'verified' ? <CheckCircle2 size={24} /> : <Clock size={24} />}
-                      </div>
+          {loading ? (
+            <div style={{ padding: '80px 0', display: 'flex', justifyContent: 'center' }}>
+              <div className="w-8 h-8 border-2 border-[#FFB300] border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : logs.length === 0 ? (
+            <div style={{ padding: '80px 0', textAlign: 'center' }}>
+              <FileCheck size={40} style={{ margin: '0 auto 16px', color: 'rgba(17,35,59,0.15)' }} />
+              <p style={{ fontSize: '12px', color: '#52617A', fontFamily: 'var(--font-mono)', textTransform: 'uppercase' }}>No compliance logs available yet.</p>
+              <p style={{ fontSize: '11px', color: '#52617A', marginTop: '8px' }}>Logs will appear here once your campaigns go live.</p>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              {logs.map((log, i) => (
+                <motion.div
+                  key={log.id}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                  style={{ display: 'flex', gap: '16px', paddingBottom: '24px', borderBottom: '1px solid rgba(17,35,59,0.06)' }}
+                >
+                  <div style={{ flexShrink: 0 }}>
+                    <div style={{
+                      width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      backgroundColor: log.status === 'verified' ? 'rgba(16,185,129,0.10)' : 'rgba(255,179,0,0.10)',
+                      color: log.status === 'verified' ? '#10b981' : '#FFB300'
+                    }}>
+                      {log.status === 'verified' ? <CheckCircle2 size={20} /> : <Clock size={20} />}
                     </div>
-                    <div className="flex-grow space-y-4">
-                      <div className="flex flex-col md:flex-row justify-between gap-2">
-                        <div>
-                          <h4 className="font-bold text-lg">{log.offerTitle || 'Campaign Update'}</h4>
-                          <p className="text-sm text-muted-foreground flex items-center gap-2">
-                            <MapPin size={14} /> {log.retailerName} - {log.locationName}
-                          </p>
-                        </div>
-                        <div className="text-sm text-muted-foreground flex items-center gap-2">
-                          <Calendar size={14} /> {log.timestamp?.seconds ? new Date(log.timestamp.seconds * 1000).toLocaleString() : 'N/A'}
-                        </div>
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginBottom: '10px' }}>
+                      <div>
+                        <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#11233B', marginBottom: '3px' }}>{log.offerTitle || 'Campaign Update'}</h4>
+                        <p style={{ fontSize: '11px', color: '#52617A', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <MapPin size={11} /> {log.retailerName} — {log.locationName}
+                        </p>
                       </div>
-
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                        {log.photoUrls?.map((url: string, idx: number) => (
-                          <div key={idx} className="aspect-square bg-[#17181B] rounded-2xl overflow-hidden relative group cursor-pointer">
-                            <img src={url} alt="Proof" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                              <Eye className="text-white" size={24} />
+                      <p style={{ fontSize: '11px', color: '#52617A', display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
+                        <Calendar size={11} /> {log.timestamp?.seconds ? new Date(log.timestamp.seconds * 1000).toLocaleString() : 'N/A'}
+                      </p>
+                    </div>
+                    {log.photoUrls && log.photoUrls.length > 0 && (
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '12px' }}>
+                        {log.photoUrls.map((url: string, idx: number) => (
+                          <div key={idx} style={{ aspectRatio: '1', overflow: 'hidden', position: 'relative', cursor: 'pointer', border: '1px solid rgba(17,35,59,0.08)' }}>
+                            <img src={url} alt="Proof" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(10,26,44,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0 }} className="group-hover:opacity-100">
+                              <Eye className="text-white" size={20} />
                             </div>
                           </div>
                         ))}
                       </div>
-
-                      <div className="flex items-center gap-4 text-xs font-bold">
-                        <div className="flex items-center gap-1 text-slate-500">
-                          <User size={14} /> Verified by: {log.verifiedBy || 'System AI'}
-                        </div>
-                        <div className={`px-2 py-0.5 rounded-md ${
-                          log.verificationType === 'agent' ? 'bg-amber-500/15 text-amber-300' : 'bg-blue-500/20 text-blue-300'
-                        }`}>
-                          {log.verificationType?.toUpperCase() || 'SELF'}
-                        </div>
-                      </div>
+                    )}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <span style={{ fontSize: '10px', color: '#52617A', display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'var(--font-mono)' }}>
+                        <User size={11} /> Verified by: {log.verifiedBy || 'System AI'}
+                      </span>
+                      <span style={{
+                        fontSize: '8px', fontWeight: 700, padding: '2px 8px', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.08em',
+                        backgroundColor: log.verificationType === 'agent' ? 'rgba(255,179,0,0.10)' : 'rgba(17,35,59,0.06)',
+                        color: log.verificationType === 'agent' ? '#FFB300' : '#52617A',
+                        border: `1px solid ${log.verificationType === 'agent' ? 'rgba(255,179,0,0.2)' : 'rgba(17,35,59,0.1)'}`
+                      }}>
+                        {log.verificationType?.toUpperCase() || 'SELF'}
+                      </span>
                     </div>
-                  </motion.div>
-                ))}
-              </div>
-            )}
-          </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
 
-        <div className="space-y-6">
-          <div className="db-card p-8">
-            <h2 className="text-xl font-bold mb-6">Compliance Health</h2>
-
-            <div className="flex flex-col items-center py-6">
-              <div className="relative w-48 h-48 mb-6">
-                <svg className="w-full h-full transform -rotate-90">
-                  <circle cx="96" cy="96" r="80" stroke="currentColor" strokeWidth="12" fill="transparent" className="text-white/10" />
-                  <circle cx="96" cy="96" r="80" stroke="currentColor" strokeWidth="12" fill="transparent" strokeDasharray="502.6" strokeDashoffset={502.6 * (1 - 0.942)} className="text-amber-400" />
-                </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-4xl font-black">94.2%</span>
-                  <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Average Rate</span>
-                </div>
-              </div>
-
-              <div className="w-full space-y-4">
-                <div className="flex justify-between items-center p-4 bg-white/5 rounded-2xl border border-white/10">
-                  <div className="flex items-center gap-3">
-                    <CheckCircle2 className="text-green-400" size={20} />
-                    <span className="font-semibold text-sm">Verified Placements</span>
-                  </div>
-                  <span className="font-bold">1,120</span>
-                </div>
-                <div className="flex justify-between items-center p-4 bg-white/5 rounded-2xl border border-white/10">
-                  <div className="flex items-center gap-3">
-                    <AlertCircle className="text-amber-300" size={20} />
-                    <span className="font-semibold text-sm">Pending Verification</span>
-                  </div>
-                  <span className="font-bold">164</span>
-                </div>
-                <div className="flex justify-between items-center p-4 bg-white/5 rounded-2xl border border-white/10">
-                  <div className="flex items-center gap-3">
-                    <AlertCircle className="text-red-400" size={20} />
-                    <span className="font-semibold text-sm">Non-Compliant</span>
-                  </div>
-                  <span className="font-bold">42</span>
-                </div>
+        {/* Right: Compliance Health */}
+        <div style={{ backgroundColor: '#ffffff', border: '1px solid rgba(17,35,59,0.10)', padding: '28px 24px' }}>
+          <h2 style={{ fontSize: '13px', fontWeight: 700, color: '#11233B', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: 'var(--font-mono)', marginBottom: '24px', paddingBottom: '14px', borderBottom: '1px solid rgba(17,35,59,0.08)' }}>Compliance Health</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: '24px', borderBottom: '1px solid rgba(17,35,59,0.06)', marginBottom: '20px' }}>
+            <div style={{ position: 'relative', width: '160px', height: '160px', marginBottom: '12px' }}>
+              <svg style={{ width: '100%', height: '100%', transform: 'rotate(-90deg)' }}>
+                <circle cx="80" cy="80" r="64" stroke="rgba(17,35,59,0.08)" strokeWidth="10" fill="transparent" />
+                <circle cx="80" cy="80" r="64" stroke="#FFB300" strokeWidth="10" fill="transparent" strokeDasharray="402" strokeDashoffset={402 * (1 - 0.942)} strokeLinecap="butt" />
+              </svg>
+              <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ fontSize: '26px', fontWeight: 900, color: '#11233B', fontFamily: 'var(--font-mono)', lineHeight: 1 }}>94.2%</span>
+                <span style={{ fontSize: '8px', fontWeight: 700, color: '#52617A', textTransform: 'uppercase', letterSpacing: '0.1em', fontFamily: 'var(--font-mono)', marginTop: '4px' }}>Avg Rate</span>
               </div>
             </div>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {[
+              { label: 'Verified Placements', value: '1,120', Icon: CheckCircle2, color: '#10b981' },
+              { label: 'Pending Verification', value: '164', Icon: AlertCircle, color: '#FFB300' },
+              { label: 'Non-Compliant', value: '42', Icon: AlertCircle, color: '#ef4444' },
+            ].map(({ label, value, Icon, color }) => (
+              <div key={label} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', backgroundColor: '#F1EFE6', border: '1px solid rgba(17,35,59,0.08)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Icon size={15} style={{ color }} />
+                  <span style={{ fontSize: '11px', fontWeight: 600, color: '#11233B', fontFamily: 'var(--font-mono)' }}>{label}</span>
+                </div>
+                <span style={{ fontSize: '14px', fontWeight: 800, color: '#11233B', fontFamily: 'var(--font-mono)' }}>{value}</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>

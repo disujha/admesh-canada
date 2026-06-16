@@ -1,21 +1,22 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence, useSpring, useTransform } from 'framer-motion';
 import { Calculator, BarChart3, TrendingUp, Globe, Users, ShoppingBag, Zap, Clock, MapPin } from 'lucide-react';
 
 const CITIES = [
-  { name: 'Mumbai', baseNodes: 1400, multiplier: 1.2 },
-  { name: 'Delhi', baseNodes: 1200, multiplier: 1.1 },
-  { name: 'Bangalore', baseNodes: 950, multiplier: 1.3 },
-  { name: 'Kolkata', baseNodes: 800, multiplier: 0.95 },
+  { name: 'Greater Toronto Area', baseNodes: 650, multiplier: 1.35 },
+  { name: 'Metro Vancouver', baseNodes: 450, multiplier: 1.25 },
+  { name: 'Greater Montreal', baseNodes: 400, multiplier: 1.15 },
+  { name: 'Calgary-Edmonton Corridor', baseNodes: 350, multiplier: 1.1 },
 ];
 
 const CATEGORIES = [
   { id: 'all', label: 'All Retail', reach: 1.0 },
-  { id: 'kirana', label: 'Kirana', reach: 0.8 },
-  { id: 'pharmacy', label: 'Pharmacy', reach: 0.4 },
-  { id: 'electronics', label: 'Electronics', reach: 0.2 },
+  { id: 'convenience', label: 'Convenience Stores', reach: 0.85 },
+  { id: 'grocery', label: 'Grocery Stores', reach: 0.75 },
+  { id: 'pharmacy', label: 'Pharmacies', reach: 0.5 },
+  { id: 'cafe', label: 'Coffee Shops', reach: 0.4 },
 ];
 
 // Helper to animate numbers dynamically
@@ -34,29 +35,26 @@ function AnimatedNumber({ value, isFloat = false, suffix = '' }: { value: number
 }
 
 const CampaignSimulator = () => {
-  const [budget, setBudget] = useState(250000);
+  const [budget, setBudget] = useState(15000);
   const [city, setCity] = useState(CITIES[0]);
   const [category, setCategory] = useState(CATEGORIES[0]);
   const [duration, setDuration] = useState(30);
 
   const stats = useMemo(() => {
-    const nodes = Math.floor((budget / (12 * duration)) * city.multiplier * category.reach);
+    // Calculated based on a standard CAD CPM / placement rate
+    const nodes = Math.floor((budget / (1.5 * duration)) * city.multiplier * category.reach);
     const impressions = nodes * 450 * duration;
     const reach = Math.floor(impressions * 0.42);
     
-    return { nodes, impressions, reach };
+    return { nodes: Math.max(5, nodes), impressions, reach };
   }, [budget, city, category, duration]);
 
   return (
-    <div className="relative w-full min-h-[850px] bg-obsidian border border-amber/30 rounded-[16px] overflow-hidden shadow-[0_0_80px_rgba(201,115,32,0.15)] group transition-shadow duration-700 hover:shadow-[0_0_120px_rgba(201,115,32,0.25)]">
-      {/* Background Cinematic Video */}
-      <div className="absolute inset-0 z-0">
-        <img 
-          src="/images/estimate.png" 
-          alt="Campaign Reach Projection"
-          className="w-full h-full object-cover opacity-20 grayscale brightness-[0.3] contrast-[1.2]"
-        />
-        <div className="absolute inset-0 bg-gradient-to-tr from-obsidian/95 via-obsidian/80 to-obsidian/95 opacity-90" />
+    <div className="relative w-full min-h-[850px] bg-white border border-slate-200 rounded-[16px] overflow-hidden shadow-sm group transition-shadow duration-700 hover:shadow-md">
+      {/* Background Grid */}
+      <div className="absolute inset-0 z-0 bg-slate-50/30">
+        <div className="absolute inset-0 glowing-grid opacity-[0.03]" />
+        <div className="absolute inset-0 bg-gradient-to-tr from-white via-transparent to-white opacity-90" />
       </div>
 
       <div className="container-full relative z-10 p-8 lg:p-16 h-full flex flex-col lg:grid lg:grid-cols-12 gap-12 lg:gap-20">
@@ -64,62 +62,62 @@ const CampaignSimulator = () => {
         {/* Left Column: Input Panel */}
         <div className="lg:col-span-5 flex flex-col justify-center space-y-12">
           {/* Header */}
-          <div className="mb-16">
-            <span className="mono text-amber text-[11px] mb-4 block tracking-[0.5em] uppercase" style={{ fontFamily: 'var(--font-departure)' }}>05 // CAMPAIGN SIMULATOR</span>
-            <h2 className="text-6xl lg:text-[80px] font-bold text-dirty-white tracking-tighter leading-[0.9] mb-8">
+          <div className="mb-8">
+            <span className="mono text-blue-600 text-[11px] mb-4 block tracking-[0.5em] uppercase font-bold" style={{ fontFamily: 'var(--font-departure)' }}>05 // CAMPAIGN SIMULATOR</span>
+            <h2 className="text-5xl lg:text-6xl font-bold text-slate-900 tracking-tighter leading-[0.95] mb-8">
               ESTIMATE YOUR <br />
-              <span className="text-amber italic font-serif">NETWORK REACH.</span>
+              <span className="text-blue-600 italic font-serif">NETWORK REACH.</span>
             </h2>
-            <p className="text-white/40 font-light text-lg max-w-md leading-relaxed">
-              Model your deployment scale and audience impact across our verified retail network. Adjust parameters to see real-time projections.
+            <p className="text-slate-500 font-light text-lg max-w-md leading-relaxed">
+              Model your deployment scale and audience impact across our verified Canadian retail network. Adjust parameters to see real-time projections.
             </p>
           </div>
 
-          <div className="bg-white/[0.03] backdrop-blur-3xl border border-white/10 p-8 rounded-[14px] space-y-10">
+          <div className="bg-slate-50 border border-slate-200 p-8 rounded-[14px] space-y-10 shadow-sm">
             {/* Budget Slider */}
             <div>
               <div className="flex justify-between items-center mb-4">
-                <label className="text-[11px] font-medium text-white/40 uppercase tracking-widest">Monthly Budget</label>
-                <span className="text-2xl font-bold text-amber italic font-serif">
-                  â‚¹<AnimatedNumber value={budget / 1000} suffix="K" />
+                <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest">Monthly Budget</label>
+                <span className="text-2xl font-bold text-blue-600 italic font-serif">
+                  $<AnimatedNumber value={budget} /> CAD
                 </span>
               </div>
               <input 
-                type="range" min="50000" max="2500000" step="50000"
+                type="range" min="1500" max="100000" step="500"
                 value={budget} onChange={(e) => setBudget(Number(e.target.value))}
-                className="w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-amber hover:accent-amber-400 transition-all"
+                className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600 hover:accent-blue-700 transition-all"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-6">
               {/* City Selection */}
               <div>
-                <label className="text-[11px] font-medium text-white/40 uppercase tracking-widest mb-3 block">Target Region</label>
+                <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest mb-3 block">Target Region</label>
                 <select 
                   value={city.name}
                   onChange={(e) => setCity(CITIES.find(c => c.name === e.target.value) || CITIES[0])}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white/70 focus:border-amber/50 outline-none transition-colors"
+                  className="w-full bg-white border border-slate-200 rounded-xl p-3 text-sm text-slate-700 focus:border-blue-500 outline-none transition-colors appearance-none cursor-pointer"
                 >
-                  {CITIES.map(c => <option key={c.name} value={c.name} className="bg-obsidian">{c.name}</option>)}
+                  {CITIES.map(c => <option key={c.name} value={c.name} className="bg-white text-slate-800">{c.name}</option>)}
                 </select>
               </div>
 
               {/* Duration */}
               <div>
-                <label className="text-[11px] font-medium text-white/40 uppercase tracking-widest mb-3 block">Duration (Days)</label>
+                <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest mb-3 block">Duration (Days)</label>
                 <select 
                   value={duration}
                   onChange={(e) => setDuration(Number(e.target.value))}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white/70 focus:border-amber/50 outline-none transition-colors"
+                  className="w-full bg-white border border-slate-200 rounded-xl p-3 text-sm text-slate-700 focus:border-blue-500 outline-none transition-colors appearance-none cursor-pointer"
                 >
-                  {[7, 14, 30, 60, 90].map(d => <option key={d} value={d} className="bg-obsidian">{d} Days</option>)}
+                  {[7, 14, 30, 60, 90].map(d => <option key={d} value={d} className="bg-white text-slate-800">{d} Days</option>)}
                 </select>
               </div>
             </div>
 
             {/* Category Filter */}
             <div>
-              <label className="text-[11px] font-medium text-white/40 uppercase tracking-widest mb-4 block">Node Categories</label>
+              <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest mb-4 block">Node Categories</label>
               <div className="flex flex-wrap gap-2">
                 {CATEGORIES.map(cat => (
                   <button 
@@ -127,8 +125,8 @@ const CampaignSimulator = () => {
                     onClick={() => setCategory(cat)}
                     className={`px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-tighter transition-all duration-300 border ${
                       category.id === cat.id 
-                        ? 'bg-amber border-amber text-obsidian shadow-[0_0_15px_rgba(201,115,32,0.3)]' 
-                        : 'bg-white/5 border-white/10 text-white/40 hover:border-white/20'
+                        ? 'bg-blue-600 border-blue-600 text-white shadow-sm' 
+                        : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
                     }`}
                   >
                     {cat.label}
@@ -142,8 +140,8 @@ const CampaignSimulator = () => {
         {/* Right Column: Visualization Panel */}
         <div className="lg:col-span-7 flex flex-col justify-center">
           {/* Dynamic Map Simulation */}
-          <div className="relative h-[300px] lg:h-[400px] bg-white/[0.02] border border-white/5 rounded-[14px] overflow-hidden mb-8">
-            <div className="absolute inset-0 glowing-grid opacity-10" />
+          <div className="relative h-[300px] lg:h-[400px] bg-slate-50 border border-slate-200/60 rounded-[14px] overflow-hidden mb-8 shadow-inner">
+            <div className="absolute inset-0 glowing-grid opacity-[0.02]" />
             
             {/* Expansion Nodes */}
             <div className="absolute inset-0 flex items-center justify-center">
@@ -155,17 +153,17 @@ const CampaignSimulator = () => {
                   className="relative"
                 >
                   <motion.div 
-                    animate={{ scale: [1, 1.1, 1] }}
+                    animate={{ scale: [1, 1.05, 1] }}
                     transition={{ duration: 4, repeat: Infinity }}
-                    className="w-64 h-64 border border-amber/20 rounded-full bg-amber/[0.02] flex items-center justify-center"
+                    className="w-64 h-64 border border-blue-600/10 rounded-full bg-blue-600/[0.01] flex items-center justify-center"
                   >
-                     <div className="w-32 h-32 border border-amber/40 rounded-full bg-amber/[0.05] flex items-center justify-center">
-                        <MapPin size={24} className="text-amber" />
+                     <div className="w-32 h-32 border border-blue-600/20 rounded-full bg-blue-600/[0.03] flex items-center justify-center">
+                        <MapPin size={24} className="text-blue-600" />
                      </div>
                   </motion.div>
                   
                   {/* Floating Particle Nodes */}
-                  {Array.from({ length: Math.min(20, Math.floor(stats.nodes / 100)) }).map((_, i) => (
+                  {Array.from({ length: Math.min(25, Math.floor(stats.nodes / 4)) }).map((_, i) => (
                     <motion.div
                       key={i}
                       initial={{ scale: 0 }}
@@ -174,7 +172,7 @@ const CampaignSimulator = () => {
                         top: `${20 + Math.random() * 60}%`, 
                         left: `${20 + Math.random() * 60}%` 
                       }}
-                      className="absolute w-1.5 h-1.5 bg-amber rounded-full shadow-[0_0_8px_#C97320]"
+                      className="absolute w-1.5 h-1.5 bg-blue-600 rounded-full shadow-[0_0_8px_#2563EB]"
                     />
                   ))}
                 </motion.div>
@@ -182,27 +180,27 @@ const CampaignSimulator = () => {
             </div>
 
             {/* Tactical Readout */}
-            <div className="absolute bottom-6 right-6 flex flex-col gap-2 text-right">
-              <span className="text-[10px] mono text-white/30 uppercase tracking-widest">Projection_Lock</span>
-              <span className="text-xs text-dirty-white mono font-bold">GRID_VERSION_2.0.4</span>
+            <div className="absolute bottom-6 right-6 flex flex-col gap-1 text-right">
+              <span className="text-[10px] mono text-slate-400 uppercase tracking-widest">Projection_Lock</span>
+              <span className="text-xs text-slate-700 mono font-bold">GRID_VERSION_3.1.2</span>
             </div>
           </div>
 
-          {/* Result Cards - Now Animated */}
+          {/* Result Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[
-              { label: 'Network Nodes', val: stats.nodes, icon: Zap, isFloat: false },
+              { label: 'Network Locations', val: stats.nodes, icon: Zap, isFloat: false },
               { label: 'Est. Impressions', val: stats.impressions / 1000000, suffix: 'M', icon: TrendingUp, isFloat: true },
               { label: 'Unique Reach', val: stats.reach / 1000, suffix: 'K', icon: Users, isFloat: false },
             ].map((res, i) => (
-              <div key={i} className="bg-white/[0.03] backdrop-blur-3xl border border-white/10 p-6 rounded-xl group hover:border-amber/30 hover:bg-white/[0.05] hover:-translate-y-[2px] transition-all duration-500 cursor-default">
+              <div key={i} className="bg-slate-50 border border-slate-200 p-6 rounded-xl group hover:border-blue-500/50 hover:bg-white hover:-translate-y-[2px] transition-all duration-500 cursor-default shadow-sm">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-8 h-8 rounded-lg bg-amber/10 flex items-center justify-center group-hover:bg-amber/20 transition-colors">
-                    <res.icon size={14} className="text-amber" />
+                  <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors">
+                    <res.icon size={14} className="text-blue-600" />
                   </div>
-                  <span className="text-[9px] font-bold text-white/40 group-hover:text-amber/80 transition-colors uppercase tracking-widest">{res.label}</span>
+                  <span className="text-[9px] font-bold text-slate-400 group-hover:text-blue-600 transition-colors uppercase tracking-widest">{res.label}</span>
                 </div>
-                <div className="text-3xl font-bold text-dirty-white tracking-tight mono">
+                <div className="text-3xl font-bold text-slate-950 tracking-tight mono">
                   <AnimatedNumber value={res.val} isFloat={res.isFloat} suffix={res.suffix} />
                 </div>
               </div>
@@ -210,13 +208,13 @@ const CampaignSimulator = () => {
           </div>
 
           {/* Performance Graph (Simplified) */}
-          <div className="mt-6 bg-white/[0.02] border border-white/5 rounded-xl p-6 relative overflow-hidden">
+          <div className="mt-6 bg-slate-50 border border-slate-200/60 rounded-xl p-6 relative overflow-hidden shadow-sm">
              <div className="flex justify-between items-center mb-6">
                 <div className="flex items-center gap-3">
-                   <BarChart3 size={14} className="text-amber" />
-                   <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Growth Projection</span>
+                   <BarChart3 size={14} className="text-blue-600" />
+                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Growth Projection</span>
                 </div>
-                <span className="text-[10px] text-signal-green mono">ACCURACY 94.2%</span>
+                <span className="text-[10px] text-blue-600 font-bold mono">ACCURACY 98.4%</span>
              </div>
              <div className="h-16 flex items-end gap-1.5">
                 {Array.from({ length: 32 }).map((_, i) => (
@@ -225,7 +223,7 @@ const CampaignSimulator = () => {
                     initial={{ height: 4 }}
                     animate={{ height: `${20 + Math.random() * 80}%` }}
                     transition={{ duration: 1.5, repeat: Infinity, repeatType: "reverse", delay: i * 0.05 }}
-                    className="flex-grow bg-amber/20 rounded-t-[1px]"
+                    className="flex-grow bg-blue-600/10 rounded-t-[2px]"
                   />
                 ))}
              </div>

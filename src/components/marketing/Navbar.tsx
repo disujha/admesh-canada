@@ -8,7 +8,7 @@ import { useAuth } from '@/context/auth-context';
 const NAV_LINKS = [
   { label: 'Network', href: '/#network' },
   { label: 'Verification', href: '/#verification' },
-  { label: 'Pricing', href: '/#pricing' },
+  { label: 'Pricing', href: '/pricing' },
   { label: 'Pilot', href: '/#pilot' },
 ];
 
@@ -80,18 +80,18 @@ const Navbar = ({ forceSolid = false, onPlanClick, onDashboardClick }: NavbarPro
           right: 0,
           zIndex: 100,
           transition: 'all 0.5s ease',
-          padding: isScrolled ? '1rem 0' : '1.5rem 0',
-          background: isScrolled || menuOpen || forceSolid ? 'rgba(12,12,14,0.97)' : 'transparent',
+          padding: isScrolled ? '0.75rem 0' : '1.25rem 0',
+          background: isScrolled || menuOpen || forceSolid ? 'rgba(241, 239, 230, 0.96)' : 'transparent',
           backdropFilter: isScrolled || menuOpen || forceSolid ? 'blur(20px)' : 'none',
-          borderBottom: `1px solid ${isScrolled || forceSolid ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0)'}`,
+          borderBottom: `1px solid ${isScrolled || forceSolid ? 'rgba(17, 35, 59, 0.08)' : 'rgba(17, 35, 59, 0)'}`,
         }}
       >
         <div className="container-full" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
 
           {/* Logo */}
-          <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
-            <img src="/icon_transparent.png" alt="AdMesh Icon" style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
-            <span style={{ fontFamily: 'var(--font-space)', fontWeight: 700, fontSize: '14px', letterSpacing: '0.2em', color: 'var(--amber)', textTransform: 'uppercase', paddingTop: '2px' }}>
+          <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
+            <img src="/icon_transparent.png" alt="AdMesh Icon" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
+            <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 600, fontSize: '13px', letterSpacing: '0.22em', color: 'var(--dirty-white)', textTransform: 'uppercase', paddingTop: '2px' }}>
               ADMESH
             </span>
           </Link>
@@ -104,16 +104,25 @@ const Navbar = ({ forceSolid = false, onPlanClick, onDashboardClick }: NavbarPro
                 href={item.href}
                 style={{
                   position: 'relative',
-                  fontSize: '13px',
-                  fontWeight: 500,
-                  color: 'rgba(240,237,230,0.75)',
+                  fontSize: '11px',
+                  fontFamily: 'var(--font-mono)',
+                  textTransform: 'uppercase',
+                  fontWeight: 600,
+                  color: 'var(--dirty-white)',
+                  opacity: 0.8,
                   textDecoration: 'none',
-                  letterSpacing: '0.04em',
+                  letterSpacing: '0.15em',
                   padding: '4px 0',
-                  transition: 'color 0.2s ease',
+                  transition: 'all 0.2s ease',
                 }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = 'var(--amber)'; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = 'rgba(240,237,230,0.75)'; }}
+                onMouseEnter={(e) => { 
+                  (e.currentTarget as HTMLElement).style.color = 'var(--amber)';
+                  (e.currentTarget as HTMLElement).style.opacity = '1';
+                }}
+                onMouseLeave={(e) => { 
+                  (e.currentTarget as HTMLElement).style.color = 'var(--dirty-white)';
+                  (e.currentTarget as HTMLElement).style.opacity = '0.8';
+                }}
               >
                 {item.label}
               </Link>
@@ -121,27 +130,33 @@ const Navbar = ({ forceSolid = false, onPlanClick, onDashboardClick }: NavbarPro
           </div>
 
           {/* Desktop CTAs */}
-          <div className="navbar-ctas">
+          <div className="navbar-ctas font-mono">
             <Link
               href={ctaHref}
               onClick={handleCtaClick}
               style={{
-                fontSize: '12px',
-                fontFamily: 'var(--font-space)',
-                letterSpacing: '0.1em',
-                color: 'var(--obsidian)',
-                background: 'var(--amber)',
+                fontSize: '11px',
+                fontFamily: 'var(--font-mono)',
+                letterSpacing: '0.15em',
+                color: 'var(--dirty-white)',
+                background: 'transparent',
                 textDecoration: 'none',
                 textTransform: 'uppercase',
-                fontWeight: 700,
-                padding: '9px 20px',
-                borderRadius: '2px',
-                transition: 'opacity 0.2s ease',
+                fontWeight: 600,
+                padding: '8px 16px',
+                border: '1px solid transparent',
+                transition: 'all 0.2s ease',
               }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.opacity = '0.9'; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.opacity = '1'; }}
+              onMouseEnter={(e) => { 
+                (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--dirty-white)'; 
+                (e.currentTarget as HTMLElement).style.color = 'var(--obsidian)';
+              }}
+              onMouseLeave={(e) => { 
+                (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent'; 
+                (e.currentTarget as HTMLElement).style.color = 'var(--dirty-white)';
+              }}
             >
-              {ctaLabel}
+              [ {ctaLabel} ]
             </Link>
           </div>
 
@@ -155,17 +170,17 @@ const Navbar = ({ forceSolid = false, onPlanClick, onDashboardClick }: NavbarPro
             <motion.span
               animate={menuOpen ? { rotate: 45, y: 6 } : { rotate: 0, y: 0 }}
               transition={{ duration: 0.25 }}
-              style={{ display: 'block', width: '22px', height: '2px', background: 'var(--amber)', borderRadius: '2px', transformOrigin: 'center' }}
+              style={{ display: 'block', width: '22px', height: '2px', background: '#0F172A', borderRadius: '2px', transformOrigin: 'center' }}
             />
             <motion.span
               animate={menuOpen ? { opacity: 0, scaleX: 0 } : { opacity: 1, scaleX: 1 }}
               transition={{ duration: 0.2 }}
-              style={{ display: 'block', width: '22px', height: '2px', background: 'var(--amber)', borderRadius: '2px' }}
+              style={{ display: 'block', width: '22px', height: '2px', background: '#0F172A', borderRadius: '2px' }}
             />
             <motion.span
               animate={menuOpen ? { rotate: -45, y: -6 } : { rotate: 0, y: 0 }}
               transition={{ duration: 0.25 }}
-              style={{ display: 'block', width: '22px', height: '2px', background: 'var(--amber)', borderRadius: '2px', transformOrigin: 'center' }}
+              style={{ display: 'block', width: '22px', height: '2px', background: '#0F172A', borderRadius: '2px', transformOrigin: 'center' }}
             />
           </button>
         </div>
@@ -187,7 +202,8 @@ const Navbar = ({ forceSolid = false, onPlanClick, onDashboardClick }: NavbarPro
                 position: 'fixed',
                 inset: 0,
                 zIndex: 98,
-                background: 'rgba(0,0,0,0.5)',
+                background: 'rgba(15,23,42,0.15)',
+                backdropFilter: 'blur(4px)',
               }}
             />
 
@@ -206,9 +222,8 @@ const Navbar = ({ forceSolid = false, onPlanClick, onDashboardClick }: NavbarPro
                 width: '80vw',
                 maxWidth: '320px',
                 zIndex: 99,
-                background: 'rgba(12,12,14,0.98)',
-                backdropFilter: 'blur(24px)',
-                borderLeft: '1px solid rgba(255,255,255,0.06)',
+                background: 'var(--obsidian)', /* Warm Paper */
+                borderLeft: '1px solid rgba(17, 35, 59, 0.1)',
                 display: 'flex',
                 flexDirection: 'column',
                 paddingTop: '80px',
@@ -231,17 +246,19 @@ const Navbar = ({ forceSolid = false, onPlanClick, onDashboardClick }: NavbarPro
                       onClick={closeMenu}
                       style={{
                         display: 'block',
-                        fontSize: '22px',
+                        fontSize: '14px',
+                        fontFamily: 'var(--font-mono)',
+                        textTransform: 'uppercase',
                         fontWeight: 600,
-                        color: 'rgba(240,237,230,0.85)',
+                        color: 'var(--dirty-white)',
                         textDecoration: 'none',
-                        letterSpacing: '0.02em',
+                        letterSpacing: '0.12em',
                         padding: '14px 0',
-                        borderBottom: '1px solid rgba(255,255,255,0.05)',
+                        borderBottom: '1px solid rgba(17, 35, 59, 0.1)',
                         transition: 'color 0.2s ease',
                       }}
                       onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = 'var(--amber)'; }}
-                      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = 'rgba(240,237,230,0.85)'; }}
+                      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = 'var(--dirty-white)'; }}
                     >
                       {item.label}
                     </Link>
@@ -263,19 +280,28 @@ const Navbar = ({ forceSolid = false, onPlanClick, onDashboardClick }: NavbarPro
                   style={{
                     display: 'block',
                     textAlign: 'center',
-                    fontSize: '13px',
-                    fontFamily: 'var(--font-space)',
-                    letterSpacing: '0.1em',
-                    color: 'var(--obsidian)',
-                    background: 'var(--amber)',
+                    fontSize: '11px',
+                    fontFamily: 'var(--font-mono)',
+                    letterSpacing: '0.15em',
+                    color: 'var(--dirty-white)',
+                    background: 'transparent',
                     textDecoration: 'none',
                     textTransform: 'uppercase',
-                    fontWeight: 700,
-                    padding: '14px 20px',
-                    borderRadius: '2px',
+                    fontWeight: 600,
+                    padding: '12px 20px',
+                    border: '1px solid var(--dirty-white)',
+                    transition: 'all 0.2s ease',
+                  }}
+                  onMouseEnter={(e) => { 
+                    (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--dirty-white)'; 
+                    (e.currentTarget as HTMLElement).style.color = 'var(--obsidian)';
+                  }}
+                  onMouseLeave={(e) => { 
+                    (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent'; 
+                    (e.currentTarget as HTMLElement).style.color = 'var(--dirty-white)';
                   }}
                 >
-                  {ctaLabel}
+                  [ {ctaLabel} ]
                 </Link>
               </motion.div>
             </motion.div>

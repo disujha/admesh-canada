@@ -13,134 +13,103 @@ import {
 const AnalyticsPage = () => {
   return (
     <div className="db-page">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
         <div>
-          <h1 className="db-heading">Analytics & Insights</h1>
-          <p className="text-muted-foreground">Deep dive into your campaign performance and reach metrics.</p>
+          <h1 style={{ fontSize: '28px', fontWeight: 900, color: '#11233B', textTransform: 'uppercase', letterSpacing: '-0.02em', fontFamily: 'var(--font-space)', marginBottom: '4px' }}>Analytics & Insights</h1>
+          <p style={{ fontSize: '11px', color: '#52617A', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Deep dive into your campaign performance and reach metrics.</p>
         </div>
-        <button className="db-btn-primary flex items-center gap-2">
-          <Download size={18} /> Export Report
+        <button className="db-btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '11px' }}>
+          <Download size={14} /> Export Report
         </button>
       </div>
 
-      <div className="relative overflow-hidden db-card p-8 lg:p-10">
-        <div className="absolute top-0 right-0 w-1/3 h-full bg-[radial-gradient(circle_at_top_right,rgba(201,115,32,0.25),transparent_70%)] opacity-60 blur-[90px]" />
-        <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-12">
+      {/* Headline Metric Card */}
+      <div style={{ backgroundColor: '#ffffff', border: '1px solid rgba(17,35,59,0.10)', padding: '40px 44px', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: 0, right: 0, width: '40%', height: '100%', background: 'radial-gradient(circle at top right, rgba(255,179,0,0.08), transparent 70%)', pointerEvents: 'none' }} />
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '48px', position: 'relative', zIndex: 1 }}>
           <div>
-            <p className="text-slate-400 font-bold text-xs uppercase tracking-[0.2em] mb-4">Total Impressions</p>
-            <h2 className="text-6xl font-black mb-2">2.4M</h2>
-            <div className="flex items-center gap-2 text-green-400 font-bold">
-              <TrendingUp size={20} /> +24% from last month
+            <p style={{ fontSize: '9px', fontWeight: 700, color: '#52617A', textTransform: 'uppercase', letterSpacing: '0.15em', fontFamily: 'var(--font-mono)', marginBottom: '12px' }}>Total Impressions</p>
+            <h2 style={{ fontSize: '52px', fontWeight: 900, color: '#11233B', lineHeight: 1, fontFamily: 'var(--font-space)', marginBottom: '10px' }}>2.4M</h2>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#10b981', fontWeight: 700, fontSize: '12px' }}>
+              <TrendingUp size={16} /> +24% from last month
             </div>
           </div>
-          <div className="flex flex-col justify-center">
-            <div className="h-24 flex items-end gap-2 mb-4">
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <div style={{ height: '80px', display: 'flex', alignItems: 'flex-end', gap: '6px', marginBottom: '12px' }}>
               {[40, 60, 45, 90, 65, 80, 100].map((h, i) => (
-                <div key={i} className="flex-grow bg-amber-500/30 rounded-t-lg transition-all hover:bg-amber-500/70" style={{ height: `${h}%` }} />
+                <div key={i} style={{ flex: 1, backgroundColor: i === 6 ? '#FFB300' : 'rgba(255,179,0,0.25)', height: `${h}%`, transition: 'background-color 0.15s ease' }} />
               ))}
             </div>
-            <p className="text-slate-400 text-sm font-medium">Daily Engagement Growth</p>
+            <p style={{ fontSize: '10px', color: '#52617A', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Daily Engagement Growth</p>
           </div>
-          <div className="flex flex-col justify-center space-y-4">
-            <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
-              <p className="text-xs text-slate-400 font-bold mb-1 uppercase">Average CPC</p>
-              <p className="text-2xl font-bold">$0.12</p>
-            </div>
-            <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
-              <p className="text-xs text-slate-400 font-bold mb-1 uppercase">Store Coverage</p>
-              <p className="text-2xl font-bold">1,284 <span className="text-sm font-normal text-slate-400">stores</span></p>
-            </div>
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '12px' }}>
+            {[
+              { label: 'Average CPC', value: '$0.12' },
+              { label: 'Store Coverage', value: '1,284 stores' },
+            ].map(({ label, value }) => (
+              <div key={label} style={{ padding: '14px 18px', backgroundColor: '#F1EFE6', border: '1px solid rgba(17,35,59,0.08)' }}>
+                <p style={{ fontSize: '9px', fontWeight: 700, color: '#52617A', textTransform: 'uppercase', letterSpacing: '0.1em', fontFamily: 'var(--font-mono)', marginBottom: '6px' }}>{label}</p>
+                <p style={{ fontSize: '20px', fontWeight: 800, color: '#11233B', fontFamily: 'var(--font-mono)', lineHeight: 1 }}>{value}</p>
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="db-card p-8">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-xl font-bold flex items-center gap-2">
-              <MapIcon className="db-accent" size={20} /> Geographic Reach
+      {/* Two column charts */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+        {/* Province breakdown */}
+        <div style={{ backgroundColor: '#ffffff', border: '1px solid rgba(17,35,59,0.10)', padding: '28px 32px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+            <h2 style={{ fontSize: '13px', fontWeight: 700, color: '#11233B', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: 'var(--font-mono)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Target size={14} style={{ color: '#FFB300' }} /> Province Performance
             </h2>
-            <select className="db-input border-0 rounded-lg text-sm font-bold p-2 max-w-[140px]">
-              <option>Top Cities</option>
-              <option>By State</option>
-            </select>
           </div>
-
-          <div className="space-y-6">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             {[
-              { city: 'Mumbai', percentage: 35, count: 422 },
-              { city: 'Delhi NCR', percentage: 25, count: 310 },
-              { city: 'Bangalore', percentage: 15, count: 185 },
-              { city: 'Hyderabad', percentage: 12, count: 148 },
-              { city: 'Chennai', percentage: 13, count: 219 },
-            ].map((item, i) => (
-              <div key={i} className="space-y-2">
-                <div className="flex justify-between text-sm font-bold">
-                  <span>{item.city}</span>
-                  <span className="text-muted-foreground">{item.count} stores - {item.percentage}%</span>
+              { province: 'Ontario', reach: '1.2M', pct: 52 },
+              { province: 'Quebec', reach: '580K', pct: 26 },
+              { province: 'British Columbia', reach: '380K', pct: 16 },
+              { province: 'Alberta', reach: '140K', pct: 6 },
+            ].map(({ province, reach, pct }) => (
+              <div key={province}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
+                  <span style={{ fontSize: '11px', fontWeight: 600, color: '#11233B', fontFamily: 'var(--font-mono)' }}>{province}</span>
+                  <span style={{ fontSize: '11px', fontWeight: 700, color: '#52617A', fontFamily: 'var(--font-mono)' }}>{reach}</span>
                 </div>
-                <div className="h-3 w-full bg-white/5 rounded-full overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    whileInView={{ width: `${item.percentage}%` }}
-                    viewport={{ once: true }}
-                    className="h-full bg-gradient-to-r from-amber-500 to-amber-300 rounded-full"
-                  />
+                <div style={{ height: '4px', backgroundColor: 'rgba(17,35,59,0.08)', overflow: 'hidden' }}>
+                  <div style={{ height: '100%', backgroundColor: '#FFB300', width: `${pct}%`, transition: 'width 0.3s ease' }} />
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="db-card p-8">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-xl font-bold flex items-center gap-2">
-              <Target className="db-accent" size={20} /> Store Type Distribution
+        {/* Store category breakdown */}
+        <div style={{ backgroundColor: '#ffffff', border: '1px solid rgba(17,35,59,0.10)', padding: '28px 32px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+            <h2 style={{ fontSize: '13px', fontWeight: 700, color: '#11233B', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: 'var(--font-mono)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Zap size={14} style={{ color: '#FFB300' }} /> Category Breakdown
             </h2>
           </div>
-
-          <div className="flex flex-col md:flex-row items-center gap-12">
-            <div className="relative w-48 h-48">
-              <svg className="w-full h-full transform -rotate-90">
-                <circle cx="96" cy="96" r="80" stroke="#FF5C00" strokeWidth="32" fill="transparent" strokeDasharray="502.6" strokeDashoffset="150" />
-                <circle cx="96" cy="96" r="80" stroke="#121212" strokeWidth="32" fill="transparent" strokeDasharray="502.6" strokeDashoffset="350" />
-                <circle cx="96" cy="96" r="80" stroke="#F1F5F9" strokeWidth="32" fill="transparent" strokeDasharray="502.6" strokeDashoffset="450" />
-              </svg>
-            </div>
-
-            <div className="flex-grow space-y-4">
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 rounded-full bg-amber-500" />
-                  <span className="text-sm font-bold">Kirana Stores</span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {[
+              { label: 'Convenience Stores', stores: 612, pct: 48 },
+              { label: 'Pharmacies', stores: 284, pct: 22 },
+              { label: 'Supermarkets', stores: 218, pct: 17 },
+              { label: 'Cafe & Coffee Shops', stores: 170, pct: 13 },
+            ].map(({ label, stores, pct }) => (
+              <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', backgroundColor: '#F1EFE6', border: '1px solid rgba(17,35,59,0.06)' }}>
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontSize: '11px', fontWeight: 600, color: '#11233B', fontFamily: 'var(--font-mono)', marginBottom: '5px' }}>{label}</p>
+                  <div style={{ height: '3px', backgroundColor: 'rgba(17,35,59,0.08)', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', backgroundColor: '#11233B', width: `${pct}%` }} />
+                  </div>
                 </div>
-                <span className="font-bold">62%</span>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: '#11233B', fontFamily: 'var(--font-mono)', flexShrink: 0 }}>{stores}</span>
               </div>
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 rounded-full bg-amber-300" />
-                  <span className="text-sm font-bold">Pharmacies</span>
-                </div>
-                <span className="font-bold">24%</span>
-              </div>
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 rounded-full bg-slate-200" />
-                  <span className="text-sm font-bold">Other Retail</span>
-                </div>
-                <span className="font-bold">14%</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-12 p-6 bg-white/5 rounded-3xl border border-white/10">
-            <div className="flex items-center gap-3 mb-4 db-accent">
-              <Zap size={20} />
-              <h4 className="font-bold">Optimization Tip</h4>
-            </div>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Your campaigns in <strong>Kirana Stores</strong> have 15% higher engagement compared to other formats. We recommend shifting 10% of your budget to this category for next month.
-            </p>
+            ))}
           </div>
         </div>
       </div>

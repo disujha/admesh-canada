@@ -4,13 +4,13 @@ import React from 'react';
 
 const BrandMarquee = () => {
   const brands = [
-    'RELIANCE_RETAIL', 'NESTLE', 'HINDUSTAN_UNILEVER', 'PEPSICO', 'PARLE', 'AMUL', 'MARICO', 'BRITANNIA', 'DABUR', 'ITC'
+    'LOBLAWS', 'SHOPPERS_DRUG_MART', 'SOBEYS', 'TIM_HORTONS', 'CIRCLE_K', 'METRO', 'PETRO_CANADA', 'CANADIAN_TIRE', 'REXALL', 'PIZZA_PIZZA'
   ];
 
   return (
-    <div className="relative w-full overflow-hidden bg-obsidian py-12 border-y border-white-5">
-      <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-obsidian to-transparent z-10" />
-      <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-obsidian to-transparent z-10" />
+    <div className="relative w-full overflow-hidden bg-[#F1EFE6] py-10 border-y border-[#11233B]/10">
+      <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[#F1EFE6] to-transparent z-10 pointer-events-none" />
+      <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-[#F1EFE6] to-transparent z-10 pointer-events-none" />
       
       <div className="flex animate-marquee whitespace-nowrap">
         {[...Array(3)].map((_, outerIndex) => (
@@ -18,7 +18,7 @@ const BrandMarquee = () => {
             {brands.map((brand) => (
               <span 
                 key={brand} 
-                className="mono text-[14px] text-white-20 hover:text-amber transition-colors tracking-[0.4em] uppercase font-bold cursor-default"
+                className="font-mono text-[12px] text-[#11233B]/25 hover:text-[#FFB300] transition-colors tracking-[0.3em] uppercase font-bold cursor-default"
               >
                 {brand}
               </span>

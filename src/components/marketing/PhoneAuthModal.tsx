@@ -82,7 +82,7 @@ export default function PhoneAuthModal({ isOpen, onClose }: PhoneAuthModalProps)
     let formattedNumber = phoneNumber.trim();
     if (!formattedNumber.startsWith('+')) {
       if (formattedNumber.startsWith('0')) formattedNumber = formattedNumber.substring(1);
-      formattedNumber = `+91${formattedNumber}`;
+      formattedNumber = `+1${formattedNumber}`;
     }
     if (formattedNumber.length < 10) {
       setError('Please enter a valid 10-digit mobile number.');
@@ -114,7 +114,7 @@ export default function PhoneAuthModal({ isOpen, onClose }: PhoneAuthModalProps)
     try {
       let verifiedUser: any = null;
       if (!confirmationResult || !process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
-        verifiedUser = { uid: 'mock_uid_' + Math.random().toString(36).substring(7), phoneNumber: `+91${phoneNumber}` };
+        verifiedUser = { uid: 'mock_uid_' + Math.random().toString(36).substring(7), phoneNumber: `+1${phoneNumber}` };
       } else {
         const result = await confirmationResult.confirm(otpCode);
         verifiedUser = result.user;
@@ -216,7 +216,7 @@ export default function PhoneAuthModal({ isOpen, onClose }: PhoneAuthModalProps)
             </h1>
           </div>
           <p className="text-[13px] text-white/50 font-light max-w-xs tracking-wide leading-relaxed mt-6">
-            India's largest verified retail media network. Reach 14,000+ stores with programmatic precision.
+            Canada's premium retail media infrastructure. Reach verified storefronts with programmatic precision.
           </p>
         </div>
 
@@ -235,7 +235,7 @@ export default function PhoneAuthModal({ isOpen, onClose }: PhoneAuthModalProps)
 
         {/* Mobile close */}
         <div className="absolute top-6 left-6 md:hidden z-30">
-          <button onClick={onClose} className="flex items-center gap-2 text-[10px] tracking-[0.2em] text-white/40 hover:text-amber transition-colors mono uppercase font-bold">
+          <button onClick={onClose} className="flex items-center gap-2 text-[10px] tracking-[0.2em] text-slate-400 hover:text-amber transition-colors mono uppercase font-bold">
             <ArrowLeft size={14} /> Back
           </button>
         </div>
@@ -253,7 +253,7 @@ export default function PhoneAuthModal({ isOpen, onClose }: PhoneAuthModalProps)
               {step === 'phone' ? '01 / IDENTIFY' : step === 'otp' ? '02 / VERIFY' : step === 'profile' ? '03 / ONBOARD' : '✓ COMPLETE'}
             </p>
             <h2 className="text-4xl font-black tracking-tight text-dirty-white mb-3">{stepMeta[step].title}</h2>
-            <p className="text-white/40 font-light text-sm">{stepMeta[step].sub}</p>
+            <p className="text-slate-500 font-light text-sm">{stepMeta[step].sub}</p>
           </div>
 
           {/* Error Banner */}
@@ -272,16 +272,16 @@ export default function PhoneAuthModal({ isOpen, onClose }: PhoneAuthModalProps)
                   <label className="mono text-[10px] uppercase tracking-[0.2em] text-amber opacity-60 group-focus-within:opacity-100 transition-opacity block">
                     Mobile Number
                   </label>
-                  <div className="relative flex items-center">
-                    <span className="absolute left-4 mono text-sm font-bold text-amber/80 select-none">+91</span>
+                  <div className="relative flex items-center w-full h-16 rounded-xl border border-slate-200 bg-slate-50 focus-within:border-amber/50 transition-colors">
+                    <span className="absolute left-4 mono text-sm font-bold text-amber/80 select-none">+1</span>
                     <input
                       type="tel"
                       value={phoneNumber}
                       onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ''))}
                       required
                       maxLength={10}
-                      className="w-full py-4 pl-14 pr-4 input-molten text-sm placeholder:text-white/20 font-bold tracking-widest"
-                      placeholder="98765 43210"
+                      className="w-full h-full py-4 pl-14 pr-4 bg-transparent text-sm placeholder:text-slate-400 text-slate-900 font-bold tracking-widest outline-none"
+                      placeholder="416 555 0199"
                     />
                   </div>
                 </div>
@@ -310,7 +310,7 @@ export default function PhoneAuthModal({ isOpen, onClose }: PhoneAuthModalProps)
                     onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
                     required
                     maxLength={6}
-                    className="w-full py-4 px-4 input-molten text-center text-2xl font-black tracking-[0.5em] placeholder:text-white/20 placeholder:tracking-widest"
+                    className="w-full py-4 px-4 bg-slate-50 border border-slate-200 rounded-xl text-center text-2xl font-black tracking-[0.5em] text-slate-900 placeholder:text-slate-400 placeholder:tracking-widest focus:border-amber/50 outline-none"
                     placeholder="000000"
                   />
                 </div>
@@ -327,7 +327,7 @@ export default function PhoneAuthModal({ isOpen, onClose }: PhoneAuthModalProps)
                 <button
                   type="button"
                   onClick={() => setStep('phone')}
-                  className="flex items-center gap-2 text-[10px] mono text-white/30 hover:text-amber uppercase tracking-wider transition-colors mx-auto"
+                  className="flex items-center gap-2 text-[10px] mono text-slate-400 hover:text-amber uppercase tracking-wider transition-colors mx-auto"
                 >
                   <RefreshCw size={10} /> Change Number
                 </button>
@@ -339,44 +339,44 @@ export default function PhoneAuthModal({ isOpen, onClose }: PhoneAuthModalProps)
               <motion.form key="profile" onSubmit={handleRegisterProfile} className="space-y-6">
                 <div className="space-y-3 group">
                   <label className="mono text-[10px] uppercase tracking-[0.2em] text-amber opacity-60 group-focus-within:opacity-100 transition-opacity block">Full Name *</label>
-                  <div className="relative">
-                    <User className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-amber transition-colors" size={14} />
+                  <div className="relative flex items-center h-14 rounded-xl border border-slate-200 bg-slate-50 focus-within:border-amber/50 transition-colors">
+                    <User className="absolute left-4 text-slate-400 group-focus-within:text-amber transition-colors" size={14} />
                     <input
                       type="text"
                       value={registerForm.name}
                       onChange={(e) => setRegisterForm({ ...registerForm, name: e.target.value })}
                       required
-                      className="w-full py-4 pl-11 pr-4 input-molten text-sm placeholder:text-white/20"
-                      placeholder="e.g. Rahul Sharma"
+                      className="w-full h-full pl-11 pr-4 bg-transparent text-sm placeholder:text-slate-400 text-slate-900 outline-none"
+                      placeholder="e.g. Alex Tremblay"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-3 group">
                   <label className="mono text-[10px] uppercase tracking-[0.2em] text-amber opacity-60 group-focus-within:opacity-100 transition-opacity block">Work Email *</label>
-                  <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-amber transition-colors" size={14} />
+                  <div className="relative flex items-center h-14 rounded-xl border border-slate-200 bg-slate-50 focus-within:border-amber/50 transition-colors">
+                    <Mail className="absolute left-4 text-slate-400 group-focus-within:text-amber transition-colors" size={14} />
                     <input
                       type="email"
                       value={registerForm.email}
                       onChange={(e) => setRegisterForm({ ...registerForm, email: e.target.value })}
                       required
-                      className="w-full py-4 pl-11 pr-4 input-molten text-sm placeholder:text-white/20"
-                      placeholder="name@company.com"
+                      className="w-full h-full pl-11 pr-4 bg-transparent text-sm placeholder:text-slate-400 text-slate-900 outline-none"
+                      placeholder="alex@company.ca"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-3 group">
-                  <label className="mono text-[10px] uppercase tracking-[0.2em] text-amber opacity-60 group-focus-within:opacity-100 transition-opacity block">Company Name <span className="text-white/20 normal-case tracking-normal">(optional)</span></label>
-                  <div className="relative">
-                    <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-amber transition-colors" size={14} />
+                  <label className="mono text-[10px] uppercase tracking-[0.2em] text-amber opacity-60 group-focus-within:opacity-100 transition-opacity block">Company Name <span className="text-slate-400 normal-case tracking-normal">(optional)</span></label>
+                  <div className="relative flex items-center h-14 rounded-xl border border-slate-200 bg-slate-50 focus-within:border-amber/50 transition-colors">
+                    <Building2 className="absolute left-4 text-slate-400 group-focus-within:text-amber transition-colors" size={14} />
                     <input
                       type="text"
                       value={registerForm.company}
                       onChange={(e) => setRegisterForm({ ...registerForm, company: e.target.value })}
-                      className="w-full py-4 pl-11 pr-4 input-molten text-sm placeholder:text-white/20"
-                      placeholder="e.g. Acme Brands Ltd."
+                      className="w-full h-full pl-11 pr-4 bg-transparent text-sm placeholder:text-slate-400 text-slate-900 outline-none"
+                      placeholder="e.g. Shopify Inc."
                     />
                   </div>
                 </div>
@@ -406,7 +406,7 @@ export default function PhoneAuthModal({ isOpen, onClose }: PhoneAuthModalProps)
                 <div>
                   <p className="mono text-[10px] uppercase tracking-[0.3em] text-signal-green mb-2">Session Active</p>
                   <h3 className="text-3xl font-black tracking-tight text-dirty-white">You're In.</h3>
-                  <p className="text-white/40 text-sm mt-2 font-light">Taking you to your brand dashboard...</p>
+                  <p className="text-slate-500 text-sm mt-2 font-light">Taking you to your brand dashboard...</p>
                 </div>
                 <div className="flex justify-center pt-2">
                   <div className="w-6 h-6 rounded-full border-2 border-amber border-t-transparent animate-spin" />

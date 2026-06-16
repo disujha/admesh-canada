@@ -1,348 +1,412 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/auth-context';
 import { db } from '@/lib/firebase';
-import { collection, getDocs, limit, orderBy, query, where } from 'firebase/firestore';
-import { ArrowRight, RefreshCw, MapPin, Store, X, TrendingUp, ClipboardList, Clock, Layers } from 'lucide-react';
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import { 
+  Plus, 
+  Search, 
+  ChevronDown, 
+  SlidersHorizontal,
+  Calendar,
+  DollarSign,
+  TrendingUp,
+  Store,
+  Play,
+  X
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
-type StoreItem = {
+type CampaignDoc = {
   id: string;
-  name: string;
-  category: string;
-  location: string;
-  imageUrl: string | null;
+  name?: string;
+  title?: string;
+  status?: string;
+  targetLocations?: string;
+  location?: string;
+  retailTypes?: string[];
+  outletCount?: number;
+  budget?: number;
+  createdAt?: { seconds?: number };
+  adFormat?: { name?: string };
+  roi?: string;
+  progress?: number;
+  updatedAt?: { seconds?: number };
+  cities?: string;
+  lastUpdated?: string;
 };
 
-function mapStoreDoc(id: string, data: Record<string, unknown>): StoreItem {
-  const pick = (...keys: string[]) => {
-    for (const key of keys) {
-      const value = data[key];
-      if (typeof value === 'string' && value.trim()) return value.trim();
-    }
-    return '';
-  };
-
-  const name = pick('storeName', 'name', 'retailerName', 'shopName', 'title') || 'Unnamed Store';
-  const category = pick('category', 'storeCategory', 'retailCategory', 'type') || 'General Retail';
-  const location = pick('location', 'locationName', 'city', 'area', 'pincode', 'postalCode') || 'Location unavailable';
-  const imageUrl = pick('storefrontImage', 'storeFrontImage', 'imageUrl', 'photoUrl', 'frontImage') || null;
-
-  return { id, name, category, location, imageUrl };
-}
-
-export default function DashboardOverview() {
+export default function CampaignWorkspaceLanding() {
   const { profile, user } = useAuth();
-  const [stores, setStores] = useState<StoreItem[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [selectedStore, setSelectedStore] = useState<StoreItem | null>(null);
+  
+  // Dynamic Campaigns State loaded from Firebase
+  const [campaigns, setCampaigns] = useState<CampaignDoc[]>([]);
+  const [loading, setLoading] = useState(true);
+  
+  // Search & Filters State
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('All');
+  const [provinceFilter, setProvinceFilter] = useState('All');
+  const [budgetFilter, setBudgetFilter] = useState('All');
 
-  // Metrics States
-  const [campaignCount, setCampaignCount] = useState(0);
-  const [requestCount, setRequestCount] = useState(0);
-  const [totalOutlets, setTotalOutlets] = useState(0);
-  const [loadingMetrics, setLoadingMetrics] = useState(true);
+  const [activeDropdown, setActiveDropdown] = useState<'status' | 'province' | 'budget' | null>(null);
+  const [showDemoModal, setShowDemoModal] = useState(false);
 
-  const firstName = useMemo(() => (profile?.displayName || 'Team').split(' ')[0], [profile?.displayName]);
-
-  const loadStores = React.useCallback(async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const candidates = ['stores', 'retailers'];
-      let result: StoreItem[] = [];
-
-      for (const coll of candidates) {
-        try {
-          const q = query(collection(db, coll), orderBy('createdAt', 'desc'), limit(20));
-          const snap = await getDocs(q);
-          result = snap.docs.map((d) => mapStoreDoc(d.id, d.data() as Record<string, unknown>));
-          if (result.length > 0) break;
-        } catch {
-          const qFallback = query(collection(db, coll), limit(20));
-          const snapFallback = await getDocs(qFallback);
-          result = snapFallback.docs.map((d) => mapStoreDoc(d.id, d.data() as Record<string, unknown>));
-          if (result.length > 0) break;
-        }
-      }
-
-      setStores(result);
-    } catch {
-      setError('Could not load recent stores right now.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const loadMetrics = React.useCallback(async () => {
+  // Fetch campaign requests and active offers from Firestore
+  const loadCampaigns = React.useCallback(async () => {
     const brandId = profile?.brandId || user?.uid;
     if (!brandId) return;
 
-    setLoadingMetrics(true);
+    setLoading(true);
     try {
       // 1. Fetch offers (active campaigns)
-      let activeCount = 0;
+      let offersList: CampaignDoc[] = [];
       try {
         const qOffers = query(collection(db, 'offers'), where('brandId', '==', brandId));
         const snap = await getDocs(qOffers);
-        activeCount = snap.size;
+        offersList = snap.docs.map(doc => {
+          const data = doc.data();
+          return { 
+            id: doc.id, 
+            name: data.title || 'Active Campaign',
+            status: data.status || 'active',
+            cities: data.location || 'Multi-city',
+            stores: data.outletCount || 45,
+            budget: data.budget || 15000,
+            roi: data.roi || '4.2x',
+            progress: data.progress || 100,
+            lastUpdated: data.updatedAt?.seconds 
+              ? `${Math.round((Date.now() - data.updatedAt.seconds * 1000) / (1000 * 3600 * 24))} days ago` 
+              : 'Yesterday',
+            ...data 
+          } as CampaignDoc;
+        });
       } catch (err) {
-        console.warn('Error fetching offers metrics:', err);
+        console.warn('Error fetching offers:', err);
       }
 
-      // 2. Fetch campaign_requests (pending rollout requests)
-      let pendingCount = 0;
-      let outletsSum = 0;
+      // 2. Fetch campaign requests (pending/review/draft campaigns)
+      let requestsList: CampaignDoc[] = [];
       try {
         const qReqs = query(collection(db, 'campaign_requests'), where('brandId', '==', brandId));
         const snap = await getDocs(qReqs);
-        pendingCount = snap.size;
-        snap.forEach((doc) => {
+        requestsList = snap.docs.map(doc => {
           const data = doc.data();
-          outletsSum += Number(data.outletCount || 0);
+          return {
+            id: doc.id,
+            name: data.name || (data.adFormat?.name ? `${data.adFormat.name} Request` : 'Campaign Request'),
+            status: data.status || 'pending',
+            cities: data.targetLocations || 'Multi-city',
+            stores: data.outletCount || 25,
+            budget: data.budget || 12000,
+            roi: data.roi || '3.5x',
+            progress: data.status === 'pending' ? 20 : data.status === 'review' ? 60 : 10,
+            lastUpdated: data.updatedAt?.seconds 
+              ? `${Math.round((Date.now() - data.updatedAt.seconds * 1000) / (1000 * 3600))} hours ago` 
+              : '2 hours ago',
+            createdAt: data.createdAt,
+            adFormat: data.adFormat
+          } as CampaignDoc;
         });
       } catch (err) {
-        console.warn('Error fetching requests metrics:', err);
+        console.warn('Error fetching requests:', err);
       }
 
-      setCampaignCount(activeCount);
-      setRequestCount(pendingCount);
-      setTotalOutlets(outletsSum);
+      // Combine lists and sort by date descending
+      const combined = [...requestsList, ...offersList];
+      setCampaigns(combined);
     } catch (error) {
-      console.error('Error loading metrics:', error);
+      console.error('Error fetching campaigns:', error);
     } finally {
-      setLoadingMetrics(false);
+      setLoading(false);
     }
   }, [profile, user]);
 
-  React.useEffect(() => {
-    const timer = window.setTimeout(() => {
-      void loadStores();
-      void loadMetrics();
-    }, 0);
-    return () => window.clearTimeout(timer);
-  }, [loadStores, loadMetrics]);
+  useEffect(() => {
+    if (user) {
+      loadCampaigns();
+    }
+  }, [user, loadCampaigns]);
+
+  // Filtering Logic
+  const filteredCampaigns = useMemo(() => {
+    return campaigns.filter(c => {
+      // 1. Search term match
+      const nameMatch = (c.name || '').toLowerCase().includes(searchTerm.toLowerCase());
+      const cityMatch = (c.cities || '').toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = nameMatch || cityMatch;
+
+      // 2. Status match
+      const matchesStatus = statusFilter === 'All' || c.status?.toLowerCase() === statusFilter.toLowerCase();
+
+      // 3. Province match
+      const matchesProvince = provinceFilter === 'All' || (c.cities || '').toLowerCase().includes(provinceFilter.toLowerCase());
+
+      // 4. Budget match
+      let matchesBudget = true;
+      if (budgetFilter !== 'All') {
+        const budgetVal = Number(c.budget || 0);
+        if (budgetFilter === '< $15,000') matchesBudget = budgetVal < 15000;
+        if (budgetFilter === '$15,000 - $30,000') matchesBudget = budgetVal >= 15000 && budgetVal <= 30000;
+        if (budgetFilter === '> $30,000') matchesBudget = budgetVal > 30000;
+      }
+
+      return matchesSearch && matchesStatus && matchesProvince && matchesBudget;
+    });
+  }, [campaigns, searchTerm, statusFilter, provinceFilter, budgetFilter]);
+
+  const toggleDropdown = (dropdown: 'status' | 'province' | 'budget') => {
+    setActiveDropdown(prev => prev === dropdown ? null : dropdown);
+  };
 
   return (
     <div className="db-page">
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl lg:text-4xl font-semibold text-slate-50 tracking-tight">Welcome back, {firstName}</h1>
-          <p className="text-slate-400 text-sm lg:text-base mt-2">Strategic retail media intelligence across campaigns, deployments, and market performance.</p>
-        </div>
-        <div className="flex items-center gap-3.5">
-          <Link href="/dashboard/campaigns/new" className="db-btn-primary h-[44px] px-6 text-sm font-semibold normal-case tracking-normal">
-            New Campaign <ArrowRight size={15} />
+
+      {/* Workspace Header Panel */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
+        <h1 style={{ fontSize: '28px', fontWeight: 900, color: '#11233B', textTransform: 'uppercase', letterSpacing: '-0.02em', fontFamily: 'var(--font-space)' }}>Campaigns</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <Link href="/dashboard/campaigns/new?templates=true" className="db-btn-ghost text-xs">Browse Templates</Link>
+          <Link href="/dashboard/campaigns/new" className="db-btn-primary text-xs">
+            <Plus size={14} />
+            <span>New Campaign</span>
           </Link>
         </div>
       </div>
 
-      <section className="w-full grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-7 items-start">
-        <div className="space-y-7">
-          {/* Metrics Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-5 gap-y-6">
-            <div className="db-card p-5 relative overflow-hidden group">
-              <div className="absolute right-4 top-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                <TrendingUp size={48} className="text-amber-500" />
-              </div>
-              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Active Campaigns</p>
-              {loadingMetrics ? (
-                <div className="h-9 w-12 bg-white/5 animate-pulse rounded mt-2" />
-              ) : (
-                <h3 className="text-3xl font-extrabold text-slate-100 mt-2">{campaignCount}</h3>
-              )}
-              <p className="text-xs text-muted-foreground mt-1">Live screen deployments</p>
-            </div>
+      {/* Conditional Workspace State */}
+      {loading ? (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '80px 0' }}>
+          <div className="w-6 h-6 border-2 border-[#11233B] border-t-transparent rounded-full animate-spin" />
+        </div>
+      ) : campaigns.length === 0 ? (
 
-            <div className="db-card p-5 relative overflow-hidden group">
-              <div className="absolute right-4 top-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                <ClipboardList size={48} className="text-amber-500" />
-              </div>
-              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Campaign Requests</p>
-              {loadingMetrics ? (
-                <div className="h-9 w-12 bg-white/5 animate-pulse rounded mt-2" />
-              ) : (
-                <h3 className="text-3xl font-extrabold text-amber-400 mt-2">{requestCount}</h3>
-              )}
-              <p className="text-xs text-muted-foreground mt-1">Pending review & rollout</p>
-            </div>
-
-            <div className="db-card p-5 relative overflow-hidden group">
-              <div className="absolute right-4 top-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                <Store size={48} className="text-amber-500" />
-              </div>
-              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Outlets Covered</p>
-              {loadingMetrics ? (
-                <div className="h-9 w-12 bg-white/5 animate-pulse rounded mt-2" />
-              ) : (
-                <h3 className="text-3xl font-extrabold text-slate-100 mt-2">{totalOutlets}</h3>
-              )}
-              <p className="text-xs text-muted-foreground mt-1">Across all campaigns</p>
+        /* ── Empty State Card ── */
+        <div style={{
+          backgroundColor: '#ffffff',
+          border: '1px solid rgba(17,35,59,0.10)',
+          display: 'grid',
+          gridTemplateColumns: '1fr auto',
+          gap: '48px',
+          alignItems: 'center',
+          padding: '64px 56px',
+        }}>
+          {/* Left: copy + CTA */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', minWidth: 0 }}>
+            <h2 style={{ fontSize: '22px', fontWeight: 800, color: '#11233B', textTransform: 'uppercase', letterSpacing: '-0.01em', lineHeight: 1.2, fontFamily: 'var(--font-space)' }}>
+              Create your first retail media campaign
+            </h2>
+            <p style={{ fontSize: '12px', color: '#52617A', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.06em', lineHeight: 1.8, maxWidth: '520px' }}>
+              Launch campaigns across verified convenience stores, pharmacies, supermarkets and cafés in Canada. Plan target locations, budget metrics, and placements directly from your workspace.
+            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '8px' }}>
+              <Link href="/dashboard/campaigns/new" className="db-btn-primary text-xs">
+                Create Campaign
+              </Link>
+              <button
+                onClick={() => setShowDemoModal(true)}
+                className="text-xs font-bold font-mono uppercase tracking-wider text-[#11233B] hover:text-[#FFB300] transition-all cursor-pointer"
+                style={{ padding: '8px 12px' }}
+              >
+                Watch Demo
+              </button>
             </div>
           </div>
 
-          <div aria-hidden="true" className="h-6 lg:h-8" />
-
-          {/* Quick Actions / Recent Campaign Request teaser */}
-          <div>
-            <div className="db-card p-6 lg:p-7 space-y-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="db-card-title">Campaign Request Center</h3>
-                  <p className="db-card-subtitle">Manage pipeline execution and request status</p>
-                </div>
-                <Link href="/dashboard/campaigns" className="text-xs text-amber-400 hover:text-amber-300 font-semibold inline-flex items-center gap-1">
-                  View All <ArrowRight size={14} />
-                </Link>
-              </div>
-
-              {loadingMetrics ? (
-                <div className="space-y-3">
-                  <div className="h-16 bg-white/5 animate-pulse rounded-lg" />
-                  <div className="h-16 bg-white/5 animate-pulse rounded-lg" />
-                </div>
-              ) : requestCount === 0 && campaignCount === 0 ? (
-                <div className="text-center py-8 rounded-lg border border-dashed border-white/10 bg-white/5">
-                  <p className="text-sm text-slate-400">No campaigns or requests drafted yet.</p>
-                  <Link href="/dashboard/campaigns/new" className="text-xs text-amber-400 hover:text-amber-300 font-semibold mt-2 inline-block">
-                    Launch first campaign request &rarr;
-                  </Link>
-                </div>
-              ) : (
-                <div className="rounded-2xl border border-white/10 overflow-visible divide-y divide-white/10" style={{ padding: '6px' }}>
-                  <div
-                    className="bg-white/5 min-h-[46px] flex items-center justify-between text-[11px] leading-5 tracking-wide text-muted-foreground rounded-xl"
-                    style={{ padding: '12px 20px' }}
-                  >
-                    <span className="pr-4">DEPLOYMENT DESCRIPTION</span>
-                    <span className="pl-4">STATUS</span>
-                  </div>
-                  {requestCount > 0 && (
-                    <div className="min-h-[72px] flex items-center justify-between text-sm rounded-xl" style={{ padding: '14px 20px' }}>
-                      <div className="pl-1 flex items-center gap-3.5" style={{ paddingLeft: '4px' }}>
-                        <div className="p-2.5 bg-amber-500/10 text-amber-400 rounded-lg" style={{ padding: '10px' }}>
-                          <Clock size={16} />
-                        </div>
-                        <div>
-                          <p className="font-semibold text-slate-100">{requestCount} Pending Campaign {requestCount === 1 ? 'Request' : 'Requests'}</p>
-                          <p className="text-xs text-muted-foreground mt-2 leading-[1.35]">Awaiting rollout plan shortlisting</p>
-                        </div>
-                      </div>
-                      <span className="mr-1 db-chip bg-amber-500/10 text-amber-400 border border-amber-500/20" style={{ marginRight: '4px' }}>Awaiting Action</span>
-                    </div>
-                  )}
-                  {campaignCount > 0 && (
-                    <div className="min-h-[72px] flex items-center justify-between text-sm rounded-xl" style={{ padding: '14px 20px' }}>
-                      <div className="pl-1 flex items-center gap-3.5" style={{ paddingLeft: '4px' }}>
-                        <div className="p-2.5 bg-emerald-500/10 text-emerald-400 rounded-lg" style={{ padding: '10px' }}>
-                          <Layers size={16} />
-                        </div>
-                        <div>
-                          <p className="font-semibold text-slate-100">{campaignCount} Active {campaignCount === 1 ? 'Campaign' : 'Campaigns'}</p>
-                          <p className="text-xs text-muted-foreground mt-2 leading-[1.35]">Live media screen placement</p>
-                        </div>
-                      </div>
-                      <span className="mr-1 db-chip bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono" style={{ marginRight: '4px' }}>ACTIVE</span>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
+          {/* Right: decorative SVG */}
+          <div style={{ width: '160px', flexShrink: 0 }}>
+            <svg viewBox="0 0 200 200" style={{ width: '100%', height: 'auto' }} fill="none" stroke="currentColor" strokeWidth="1.5" className="text-[#52617A]/25">
+              <line x1="10" y1="180" x2="190" y2="180" stroke="rgba(17,35,59,0.15)" strokeWidth="2"/>
+              <rect x="35" y="45" width="130" height="135" rx="0" stroke="rgba(17,35,59,0.08)"/>
+              <rect x="50" y="85" width="40" height="95" stroke="rgba(17,35,59,0.25)"/>
+              <circle cx="82" cy="130" r="1.5" fill="rgba(17,35,59,0.25)"/>
+              <rect x="102" y="65" width="55" height="75" rx="0" stroke="rgba(17,35,59,0.25)"/>
+              <rect x="110" y="75" width="39" height="48" rx="0" fill="rgba(255,179,0,0.06)" stroke="#FFB300" strokeWidth="1.5"/>
+              <path d="M129 93 L126 97 L128 98 L126 102 L130 100 L132 104 L133 100 L137 102 L135 98 L137 97 Z" fill="#FFB300" stroke="none"/>
+              <rect x="58" y="100" width="24" height="16" rx="0" stroke="#11233B" fill="#11233B" fillOpacity="0.03"/>
+            </svg>
           </div>
         </div>
-        <aside
-          className="w-full rounded-2xl border border-white/10 bg-[#171a1f] space-y-5 sticky top-24"
-          style={{ padding: '0.5rem' }}
-        >
-          <div className="flex items-center justify-between gap-4 pb-2">
-            <div>
-              <h2 className="text-lg font-semibold text-slate-50">New Stores Added</h2>
-              <p className="text-sm text-slate-400 mt-1.5">Live network ticker</p>
+
+      ) : (
+
+        /* ── Campaigns Listing Table ── */
+        <div style={{ backgroundColor: '#ffffff', border: '1px solid rgba(17,35,59,0.10)', padding: '32px 36px' }}>
+
+          {/* Filters & Search Toolbar */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '16px', paddingBottom: '20px', borderBottom: '1px solid rgba(17,35,59,0.08)', marginBottom: '8px' }}>
+
+            {/* Search Input */}
+            <div style={{ position: 'relative', width: '280px' }}>
+              <Search className="absolute text-[#52617A]" size={13} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+              <input
+                type="text"
+                placeholder="Filter campaigns..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="font-mono text-[#11233B] bg-[#E7E5DB]/30 border border-[#11233B]/15 focus:bg-white focus:outline-none focus:border-[#11233B] transition-all w-full"
+                style={{ height: '36px', fontSize: '11px', paddingLeft: '34px', paddingRight: '12px' }}
+              />
             </div>
-            <button
-              onClick={() => void loadStores()}
-              disabled={loading}
-              className="h-8 px-3 rounded-lg border border-white/10 bg-white/5 text-xs text-slate-300 hover:bg-white/10 disabled:opacity-50 inline-flex items-center gap-1.5"
-              style={{ padding: '0.4rem' }}
-            >
-              <RefreshCw size={15} className={loading ? 'animate-spin' : ''} /> Refresh
-            </button>
-          </div>
 
-          {error && <div className="rounded-lg border border-rose-400/30 bg-rose-500/10 text-xs text-rose-200" style={{ padding: '0.5rem' }}>{error}</div>}
+            {/* Filter Dropdown Pills */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <span className="font-mono font-bold text-[#52617A] uppercase" style={{ fontSize: '9px', letterSpacing: '0.12em' }}>Filter:</span>
 
-          <div className="max-h-[70vh] overflow-y-auto pr-1 space-y-4" style={{ padding: '0.5rem' }}>
-            {!loading && stores.length === 0 && (
-              <div className="rounded-lg border border-white/10 bg-[#20242b] text-sm text-slate-400" style={{ padding: '0.5rem' }}>
-                No recent store additions found.
-              </div>
-            )}
-
-            {stores.map((store) => (
-              <button
-                key={store.id}
-                type="button"
-                onClick={() => setSelectedStore(store)}
-                className="w-full text-left rounded-lg border border-white/10 bg-[#20242b] hover:border-amber-400/40 transition-colors"
-                style={{ padding: '0.75rem' }}
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-slate-100 truncate">{store.name}</p>
-                    <p className="text-xs text-slate-400 mt-1 truncate">{store.category}</p>
+              {/* Status Filter */}
+              <div style={{ position: 'relative' }}>
+                <button
+                  onClick={() => toggleDropdown('status')}
+                  className="border border-[#11233B]/15 font-mono uppercase text-[#11233B] hover:border-[#11233B]/30 flex items-center gap-1.5 bg-[#E7E5DB]/20 cursor-pointer"
+                  style={{ padding: '6px 10px', fontSize: '10px', letterSpacing: '0.08em' }}
+                >
+                  <span>Status: {statusFilter}</span>
+                  <ChevronDown size={11} className="text-[#52617A]" />
+                </button>
+                {activeDropdown === 'status' && (
+                  <div className="absolute right-0 mt-1 bg-[#F1EFE6] border border-[#11233B]/15 shadow-xl z-20 font-mono uppercase" style={{ width: '140px', padding: '4px', fontSize: '9px', letterSpacing: '0.08em' }}>
+                    {['All', 'Active', 'Pending', 'Draft'].map(st => (
+                      <button key={st} onClick={() => { setStatusFilter(st); setActiveDropdown(null); }} className="w-full text-left font-semibold text-[#11233B] hover:bg-[#E7E5DB]/50" style={{ padding: '6px 10px' }}>{st}</button>
+                    ))}
                   </div>
-                  <span className="inline-flex items-center gap-1 text-xs text-slate-400 shrink-0 max-w-[140px] truncate">
-                    <MapPin size={12} /> {store.location}
-                  </span>
-                </div>
-              </button>
-            ))}
-          </div>
-        </aside>
-      </section>
-
-      {selectedStore && (
-        <div className="fixed inset-0 z-50">
-          <button
-            type="button"
-            className="absolute inset-0 bg-black/60 backdrop-blur-[2px]"
-            onClick={() => setSelectedStore(null)}
-            aria-label="Close modal"
-          />
-
-          <div className="absolute left-1/2 top-1/2 w-[92vw] max-w-[560px] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-white/10 bg-[#15181d]" style={{ padding: '0.5rem' }}>
-            <div className="flex items-start justify-between gap-4 mb-4">
-              <div className="min-w-0">
-                <p className="text-lg font-semibold text-slate-50 truncate">{selectedStore.name}</p>
-                <p className="text-sm text-slate-400 mt-1">{selectedStore.category}</p>
-                <p className="text-sm text-slate-400 mt-1 inline-flex items-center gap-1"><MapPin size={13} /> {selectedStore.location}</p>
+                )}
               </div>
-              <button
-                type="button"
-                onClick={() => setSelectedStore(null)}
-                className="w-9 h-9 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 inline-flex items-center justify-center text-slate-300"
-                aria-label="Close"
-              >
-                <X size={16} />
-              </button>
-            </div>
 
-            <div className="rounded-xl border border-white/10 bg-[#20242b] overflow-hidden">
-              {selectedStore.imageUrl ? (
-                <img src={selectedStore.imageUrl} alt={`${selectedStore.name} storefront`} className="w-full h-[280px] object-cover" />
-              ) : (
-                <div className="w-full h-[280px] flex flex-col items-center justify-center text-slate-400 gap-2">
-                  <Store size={22} />
-                  <p className="text-sm">No storefront image available</p>
-                </div>
-              )}
+              {/* Province Filter */}
+              <div style={{ position: 'relative' }}>
+                <button
+                  onClick={() => toggleDropdown('province')}
+                  className="border border-[#11233B]/15 font-mono uppercase text-[#11233B] hover:border-[#11233B]/30 flex items-center gap-1.5 bg-[#E7E5DB]/20 cursor-pointer"
+                  style={{ padding: '6px 10px', fontSize: '10px', letterSpacing: '0.08em' }}
+                >
+                  <span>Province: {provinceFilter}</span>
+                  <ChevronDown size={11} className="text-[#52617A]" />
+                </button>
+                {activeDropdown === 'province' && (
+                  <div className="absolute right-0 mt-1 bg-[#F1EFE6] border border-[#11233B]/15 shadow-xl z-20 font-mono uppercase" style={{ width: '160px', padding: '4px', fontSize: '9px', letterSpacing: '0.08em' }}>
+                    {['All', 'Ontario', 'Quebec', 'British Columbia', 'Alberta'].map(pr => (
+                      <button key={pr} onClick={() => { setProvinceFilter(pr); setActiveDropdown(null); }} className="w-full text-left font-semibold text-[#11233B] hover:bg-[#E7E5DB]/50" style={{ padding: '6px 10px' }}>{pr}</button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Budget Filter */}
+              <div style={{ position: 'relative' }}>
+                <button
+                  onClick={() => toggleDropdown('budget')}
+                  className="border border-[#11233B]/15 font-mono uppercase text-[#11233B] hover:border-[#11233B]/30 flex items-center gap-1.5 bg-[#E7E5DB]/20 cursor-pointer"
+                  style={{ padding: '6px 10px', fontSize: '10px', letterSpacing: '0.08em' }}
+                >
+                  <span>Budget: {budgetFilter}</span>
+                  <ChevronDown size={11} className="text-[#52617A]" />
+                </button>
+                {activeDropdown === 'budget' && (
+                  <div className="absolute right-0 mt-1 bg-[#F1EFE6] border border-[#11233B]/15 shadow-xl z-20 font-mono uppercase" style={{ width: '176px', padding: '4px', fontSize: '9px', letterSpacing: '0.08em' }}>
+                    {['All', '< $15,000', '$15,000 - $30,000', '> $30,000'].map(bu => (
+                      <button key={bu} onClick={() => { setBudgetFilter(bu); setActiveDropdown(null); }} className="w-full text-left font-semibold text-[#11233B] hover:bg-[#E7E5DB]/50" style={{ padding: '6px 10px' }}>{bu}</button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
+
+          {/* Campaigns Workspace Table */}
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', textAlign: 'left', fontSize: '11px', fontFamily: 'var(--font-mono)' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid rgba(17,35,59,0.08)', color: '#52617A', fontSize: '9px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                  <th style={{ padding: '12px 16px 12px 0' }}>Campaign Name</th>
+                  <th style={{ padding: '12px 8px' }}>Status</th>
+                  <th style={{ padding: '12px 8px' }}>Cities</th>
+                  <th style={{ padding: '12px 8px' }}>Stores</th>
+                  <th style={{ padding: '12px 8px' }}>Budget</th>
+                  <th style={{ padding: '12px 8px' }}>ROI</th>
+                  <th style={{ padding: '12px 8px' }}>Progress</th>
+                  <th style={{ padding: '12px 0 12px 8px', textAlign: 'right' }}>Last Updated</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredCampaigns.map((c) => (
+                  <tr key={c.id} className="hover:bg-[#E7E5DB]/30 transition-colors group" style={{ borderBottom: '1px solid rgba(17,35,59,0.04)' }}>
+                    <td style={{ padding: '16px 16px 16px 0', fontWeight: 700, color: '#11233B' }}>
+                      <Link href={`/dashboard/campaigns/${c.id}`} className="hover:text-[#FFB300] transition-colors uppercase">{c.name}</Link>
+                    </td>
+                    <td style={{ padding: '16px 8px' }}>
+                      <span className={`text-[8px] font-bold border uppercase tracking-wider ${
+                        c.status === 'active' || c.status === 'live' ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                        : c.status === 'draft' ? 'bg-[#52617A]/10 text-[#52617A] border-[#52617A]/20'
+                        : 'bg-[#FFB300]/10 text-[#FFB300] border-[#FFB300]/20'
+                      }`} style={{ padding: '2px 6px' }}>
+                        {c.status || 'pending'}
+                      </span>
+                    </td>
+                    <td style={{ padding: '16px 8px', color: '#52617A', textTransform: 'uppercase' }}>{c.cities}</td>
+                    <td style={{ padding: '16px 8px', color: '#52617A', textTransform: 'uppercase' }}>{c.outletCount ? `${c.outletCount} stores` : '45 stores'}</td>
+                    <td style={{ padding: '16px 8px', fontWeight: 700, color: '#11233B' }}>${Number(c.budget || 0).toLocaleString()}</td>
+                    <td style={{ padding: '16px 8px', color: '#52617A', fontWeight: 700 }}>{c.roi || '4.2x'}</td>
+                    <td style={{ padding: '16px 8px', minWidth: '100px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <div style={{ width: '56px', height: '4px', backgroundColor: '#E7E5DB', overflow: 'hidden', flexShrink: 0 }}>
+                          <div style={{ height: '100%', backgroundColor: '#11233B', width: `${c.progress || 50}%`, transition: 'width 0.3s ease' }} />
+                        </div>
+                        <span style={{ fontSize: '9px', color: '#52617A', fontWeight: 700 }}>{c.progress || 50}%</span>
+                      </div>
+                    </td>
+                    <td style={{ padding: '16px 0 16px 8px', textAlign: 'right', color: '#52617A', textTransform: 'uppercase' }}>{c.lastUpdated || '2 days ago'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
         </div>
       )}
+
+      {/* Demo Modal walkthrough popup */}
+      <AnimatePresence>
+        {showDemoModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-[#0A1A2C]/40 backdrop-blur-sm"
+              onClick={() => setShowDemoModal(false)}
+            />
+
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              className="relative w-full max-w-lg bg-[#F1EFE6] border border-[#11233B]/15 rounded-none p-6 overflow-hidden z-10 space-y-4 font-mono uppercase"
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div className="min-w-0">
+                  <p className="text-sm font-bold text-[#11233B]">[ WATCH WORKSPACE DEMO ]</p>
+                  <p className="text-[9px] text-[#52617A] tracking-wider mt-1">LAUNCH CAMPAIGNS IN CANADIAN RETAIL OUTLETS</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowDemoModal(false)}
+                  className="w-7 h-7 rounded-none border border-[#11233B]/15 bg-[#E7E5DB] hover:bg-[#E7E5DB]/80 inline-flex items-center justify-center text-[#11233B] transition-colors cursor-pointer"
+                >
+                  <X size={12} />
+                </button>
+              </div>
+
+              <div className="rounded-none border border-[#11233B]/10 bg-[#0A1A2C] overflow-hidden relative aspect-video flex flex-col items-center justify-center text-slate-400 gap-2">
+                <Play size={28} className="text-[#FFB300] cursor-pointer hover:scale-110 transition-transform" />
+                <span className="text-[9px] font-bold text-[#52617A] font-mono">ADMESH_WORKSPACE_DEMO.MP4</span>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 }

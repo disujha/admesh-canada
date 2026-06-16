@@ -3,8 +3,8 @@ import "./globals.css";
 import { AuthProvider } from "@/context/auth-context";
 
 export const metadata: Metadata = {
-  title: "AdMesh // Physical Ads. Digital Precision.",
-  description: "Retail media network for brands with real-time verification and digital precision.",
+  title: "AdMesh // Canada's Retail Media Infrastructure",
+  description: "Programmatic retail media infrastructure connecting brands to local grocery stores, pharmacies, cafes, and convenience networks across Canada.",
   icons: {
     icon: '/favicon.png',
   }

@@ -51,7 +51,7 @@ const LoginPage = () => {
     let formattedNumber = phoneNumber.trim();
     if (!formattedNumber.startsWith('+')) {
       if (formattedNumber.startsWith('0')) formattedNumber = formattedNumber.substring(1);
-      formattedNumber = `+91${formattedNumber}`;
+      formattedNumber = `+1${formattedNumber}`;
     }
     if (formattedNumber.length < 10) {
       setError('Please enter a valid 10-digit mobile number.');
@@ -137,7 +137,7 @@ const LoginPage = () => {
     <div className="min-h-screen bg-obsidian text-dirty-white flex flex-col md:flex-row overflow-hidden selection:bg-amber selection:text-obsidian">
       <div className="hidden md:flex md:w-1/2 bg-obsidian-odd p-12 lg:p-20 flex-col justify-between relative overflow-hidden border-r border-white-5" style={{ paddingLeft: '5rem' }}>
         <div className="relative z-20 w-full flex flex-col gap-10">
-          <Link href="/" className="flex items-center gap-3 text-[10px] tracking-[0.2em] text-[rgba(240,237,230,0.4)] hover:text-[#C97320] transition-colors mono uppercase font-bold w-fit relative z-30">
+          <Link href="/" className="flex items-center gap-3 text-[10px] tracking-[0.2em] text-[rgba(240,237,230,0.4)] hover:text-amber transition-colors mono uppercase font-bold w-fit relative z-30">
             <ArrowLeft size={14} /> RETURN TO GRID
           </Link>
         </div>
@@ -159,9 +159,9 @@ const LoginPage = () => {
 
         <div className="relative z-10 flex flex-wrap gap-6 text-[10px] font-bold tracking-[0.2em] uppercase mono">
           <span className="animate-word-fade-1 text-dirty-white">OTP</span>
-          <span className="text-[#C97320]/40">/</span>
+          <span className="text-amber/40">/</span>
           <span className="animate-word-fade-2 text-dirty-white">Profile</span>
-          <span className="text-[#C97320]/40">/</span>
+          <span className="text-amber/40">/</span>
           <span className="animate-word-fade-3 text-dirty-white">Dashboard</span>
         </div>
       </div>
@@ -193,21 +193,21 @@ const LoginPage = () => {
             <form onSubmit={handleSendOTP} className="space-y-8">
               <div className="space-y-3 group">
                 <label className="mono text-[10px] uppercase tracking-[0.2em] text-amber opacity-60 group-focus-within:opacity-100 transition-opacity block">Mobile Number</label>
-                <div className="flex items-center h-20 rounded-xl border border-white/10 bg-[#111114] focus-within:border-amber/50 transition-colors">
-                  <span className="mono text-base font-bold text-amber/80 select-none px-4 h-full flex items-center border-r border-white/10">+91</span>
+                <div className="flex items-center h-20 rounded-xl border border-slate-200 bg-slate-50 focus-within:border-amber/50 transition-colors">
+                  <span className="mono text-base font-bold text-amber/80 select-none px-4 h-full flex items-center border-r border-slate-200">+1</span>
                   <input
                     type="tel"
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ''))}
                     required
                     maxLength={10}
-                    className="w-full h-full px-4 bg-transparent text-dirty-white text-base placeholder:text-white/20 font-bold tracking-widest outline-none"
-                    placeholder="98765 43210"
+                    className="w-full h-full px-4 bg-transparent text-slate-900 text-base placeholder:text-slate-400 font-bold tracking-widest outline-none"
+                    placeholder="416 555 0199"
                   />
                 </div>
               </div>
 
-              <button type="submit" disabled={loading || phoneNumber.length < 10} className="btn-molten group w-full h-64 text-[15px] tracking-[0.15em] mt-8 flex justify-between items-center px-8 relative overflow-hidden disabled:opacity-40">
+              <button type="submit" disabled={loading || phoneNumber.length < 10} className="btn-molten group w-full h-[64px] text-[15px] tracking-[0.15em] mt-8 flex justify-between items-center px-8 relative overflow-hidden disabled:opacity-40 text-slate-900 font-bold">
                 <span className="relative z-10">{loading ? 'SENDING CODE...' : 'SEND OTP'}</span>
                 <ArrowRight size={20} className="relative z-10 transition-transform duration-200 group-hover:translate-x-1" />
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[rgba(255,255,255,0.08)] to-transparent -translate-x-full group-hover:animate-shimmer z-0" />
@@ -219,16 +219,16 @@ const LoginPage = () => {
             <form onSubmit={handleVerifyOTP} className="space-y-8">
               <div className="space-y-3 group">
                 <label className="mono text-[10px] uppercase tracking-[0.2em] text-amber opacity-60 group-focus-within:opacity-100 transition-opacity block">Verification Code</label>
-                <input type="text" value={otpCode} onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))} required maxLength={6} className="w-full py-4 px-4 input-molten text-center text-2xl font-black tracking-[0.5em] placeholder:text-white/20 placeholder:tracking-widest" placeholder="000000" />
+                <input type="text" value={otpCode} onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))} required maxLength={6} className="w-full py-4 px-4 bg-slate-50 border border-slate-200 rounded-xl text-center text-2xl font-black tracking-[0.5em] text-slate-900 placeholder:text-slate-400 placeholder:tracking-widest focus:border-amber/50 outline-none" placeholder="000000" />
               </div>
 
-              <button type="submit" disabled={loading || otpCode.length !== 6} className="btn-molten group w-full h-64 text-[15px] tracking-[0.15em] mt-8 flex justify-between items-center px-8 relative overflow-hidden disabled:opacity-40">
+              <button type="submit" disabled={loading || otpCode.length !== 6} className="btn-molten group w-full h-[64px] text-[15px] tracking-[0.15em] mt-8 flex justify-between items-center px-8 relative overflow-hidden disabled:opacity-40 text-slate-900 font-bold">
                 <span className="relative z-10">{loading ? 'VERIFYING...' : 'CONFIRM CODE'}</span>
                 <ShieldCheck size={20} className="relative z-10" />
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[rgba(255,255,255,0.08)] to-transparent -translate-x-full group-hover:animate-shimmer z-0" />
               </button>
 
-              <button type="button" onClick={() => { setStep('phone'); setOtpCode(''); }} className="flex items-center gap-2 text-[10px] mono text-white/30 hover:text-amber uppercase tracking-wider transition-colors mx-auto">
+              <button type="button" onClick={() => { setStep('phone'); setOtpCode(''); }} className="flex items-center gap-2 text-[10px] mono text-slate-400 hover:text-amber uppercase tracking-wider transition-colors mx-auto">
                 <RefreshCw size={10} /> Change Number
               </button>
             </form>
@@ -239,28 +239,28 @@ const LoginPage = () => {
               <div className="space-y-3 group">
                 <label className="mono text-[10px] uppercase tracking-[0.2em] text-amber opacity-60 group-focus-within:opacity-100 transition-opacity block">Full Name *</label>
                 <div className="relative">
-                  <User className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-amber transition-colors" size={14} />
-                  <input type="text" value={registerForm.name} onChange={(e) => setRegisterForm({ ...registerForm, name: e.target.value })} required className="w-full py-4 pl-11 pr-4 input-molten text-sm placeholder:text-white/20" placeholder="e.g. Rahul Sharma" />
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-amber transition-colors" size={14} />
+                  <input type="text" value={registerForm.name} onChange={(e) => setRegisterForm({ ...registerForm, name: e.target.value })} required className="w-full py-4 pl-11 pr-4 bg-slate-50 border border-slate-200 rounded-xl text-sm placeholder:text-slate-400 text-slate-900 focus:border-amber/50 outline-none transition-colors" placeholder="e.g. Alex Tremblay" />
                 </div>
               </div>
 
               <div className="space-y-3 group">
                 <label className="mono text-[10px] uppercase tracking-[0.2em] text-amber opacity-60 group-focus-within:opacity-100 transition-opacity block">Work Email *</label>
                 <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-amber transition-colors" size={14} />
-                  <input type="email" value={registerForm.email} onChange={(e) => setRegisterForm({ ...registerForm, email: e.target.value })} required className="w-full py-4 pl-11 pr-4 input-molten text-sm placeholder:text-white/20" placeholder="name@company.com" />
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-amber transition-colors" size={14} />
+                  <input type="email" value={registerForm.email} onChange={(e) => setRegisterForm({ ...registerForm, email: e.target.value })} required className="w-full py-4 pl-11 pr-4 bg-slate-50 border border-slate-200 rounded-xl text-sm placeholder:text-slate-400 text-slate-900 focus:border-amber/50 outline-none transition-colors" placeholder="alex@company.ca" />
                 </div>
               </div>
 
               <div className="space-y-3 group">
                 <label className="mono text-[10px] uppercase tracking-[0.2em] text-amber opacity-60 group-focus-within:opacity-100 transition-opacity block">Organization *</label>
                 <div className="relative">
-                  <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-amber transition-colors" size={14} />
-                  <input type="text" value={registerForm.company} onChange={(e) => setRegisterForm({ ...registerForm, company: e.target.value })} required className="w-full py-4 pl-11 pr-4 input-molten text-sm placeholder:text-white/20" placeholder="e.g. Acme Brands Ltd." />
+                  <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-amber transition-colors" size={14} />
+                  <input type="text" value={registerForm.company} onChange={(e) => setRegisterForm({ ...registerForm, company: e.target.value })} required className="w-full py-4 pl-11 pr-4 bg-slate-50 border border-slate-200 rounded-xl text-sm placeholder:text-slate-400 text-slate-900 focus:border-amber/50 outline-none transition-colors" placeholder="e.g. Shopify Inc." />
                 </div>
               </div>
 
-              <button type="submit" disabled={loading || !registerForm.name.trim() || !registerForm.email.trim() || !registerForm.company.trim()} className="btn-molten group w-full h-64 text-[15px] tracking-[0.15em] mt-8 flex justify-between items-center px-8 relative overflow-hidden disabled:opacity-40">
+              <button type="submit" disabled={loading || !registerForm.name.trim() || !registerForm.email.trim() || !registerForm.company.trim()} className="btn-molten group w-full h-[64px] text-[15px] tracking-[0.15em] mt-8 flex justify-between items-center px-8 relative overflow-hidden disabled:opacity-40 text-slate-900 font-bold">
                 <span className="relative z-10">{loading ? 'SETTING UP...' : 'COMPLETE SETUP'}</span>
                 <ArrowRight size={20} className="relative z-10 transition-transform duration-200 group-hover:translate-x-1" />
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[rgba(255,255,255,0.08)] to-transparent -translate-x-full group-hover:animate-shimmer z-0" />

@@ -3,7 +3,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence, useSpring, useTransform } from 'framer-motion';
 import { 
-  Megaphone, Zap, Target, Smartphone, Building, Coffee, Heart, ShoppingBag, 
+  Megaphone, Zap, Target, Smartphone, Store, Coffee, Heart, ShoppingBag, 
   Layers, Check, ChevronLeft, ChevronRight, X, Cpu, ShieldCheck, FileUp, 
   Radio, Play, Trophy, Users, BarChart3, CheckCircle2, ArrowRight 
 } from 'lucide-react';
@@ -29,18 +29,18 @@ function AnimatedNumber({ value, isFloat = false, suffix = '', prefix = '' }: { 
 // Data definitions
 const OBJECTIVES = [
   { id: 'awareness', label: 'Brand Awareness', icon: Megaphone, desc: 'Establish dominant local presence in neighborhood corridors.' },
-  { id: 'activation', label: 'Retail Activation', icon: Zap, desc: 'Spark immediate neighborhood buying actions near cashier tills.' },
-  { id: 'reach', label: 'Hyperlocal Reach', icon: Target, desc: 'Surgically target stores surrounding specific dealer outlets.' },
-  { id: 'engagement', label: 'Interactive Engagement', icon: Smartphone, desc: 'Acquire QR scans, surveys, and tactile button feedback.' }
+  { id: 'activation', label: 'Retail Activation', icon: Zap, desc: 'Spark immediate neighborhood buying actions near checkout counters.' },
+  { id: 'reach', label: 'Hyperlocal Reach', icon: Target, desc: 'Surgically target stores surrounding specific business centers.' },
+  { id: 'engagement', label: 'Interactive Engagement', icon: Smartphone, desc: 'Acquire QR scans, reviews, and interactive digital screen responses.' }
 ];
 
 const RETAIL_TYPES = [
-  { id: 'kirana', label: 'Kirana Store', weight: 1.0, peak: '8 AM - 12 PM & 6 PM - 9 PM', audience: 'Groceries • Spices' },
-  { id: 'cafe', label: 'Cafe & Tea Stall', weight: 1.5, peak: '4 PM - 9 PM', audience: 'Lifestyle • Tech Apps' },
-  { id: 'pharmacy', label: 'Pharmacy', weight: 1.2, peak: '10 AM - 1 PM & 5 PM - 8 PM', audience: 'OTC Drugs • Diagnostics' },
-  { id: 'supermarket', label: 'Supermarket', weight: 1.8, peak: '5 PM - 9 PM', audience: 'All Consumer Packaged Goods' },
-  { id: 'salon', label: 'Salon & Parlor', weight: 1.3, peak: '11 AM - 4 PM', audience: 'Cosmetics • Grooming' },
-  { id: 'society_store', label: 'Society Store', weight: 1.05, peak: '7 AM - 10 AM & 5 PM - 8 PM', audience: 'Dairy • Provisions' }
+  { id: 'convenience', label: 'Convenience Store', weight: 1.0, peak: '7 AM - 10 AM & 4 PM - 8 PM', audience: 'Beverages • Snacks' },
+  { id: 'cafe', label: 'Coffee Shop & Cafe', weight: 1.5, peak: '7 AM - 1 PM & 3 PM - 6 PM', audience: 'CPG • Lifestyle • Tech' },
+  { id: 'pharmacy', label: 'Pharmacy', weight: 1.2, peak: '10 AM - 1 PM & 4 PM - 7 PM', audience: 'OTC • Health Products' },
+  { id: 'grocery', label: 'Independent Grocery', weight: 1.05, peak: '11 AM - 3 PM & 5 PM - 8 PM', audience: 'Groceries • Produce' },
+  { id: 'salon', label: 'Salon & Wellness', weight: 1.3, peak: '11 AM - 4 PM', audience: 'Cosmetics • Grooming' },
+  { id: 'gas_station', label: 'Gas Station & Convenience', weight: 1.25, peak: '7 AM - 9 AM & 4 PM - 7 PM', audience: 'Snacks • Travel Packs' }
 ];
 
 const FORMATS = [
@@ -74,7 +74,7 @@ export default function FullScreenPlannerModal({ isOpen, onClose }: FullScreenPl
   const [leadBrand, setLeadBrand] = useState('');
   const [leadEmail, setLeadEmail] = useState('');
   const [leadPhone, setLeadPhone] = useState('');
-  const [leadCity, setLeadCity] = useState('Mumbai Metropolitan Region (MMR)');
+  const [leadCity, setLeadCity] = useState('Greater Toronto Area (GTA)');
   const [leadBriefFile, setLeadBriefFile] = useState<string>('');
   const [leadSubmitted, setLeadSubmitted] = useState(false);
 
@@ -113,10 +113,10 @@ export default function FullScreenPlannerModal({ isOpen, onClose }: FullScreenPl
 
   const typicalInvestmentRange = useMemo(() => {
     const nodeCount = telemetryStats.storeCount;
-    if (nodeCount <= 20) return 'Local Area Pilot (Estimated ₹45K - ₹80K)';
-    if (nodeCount <= 75) return 'Suburban Dominance Mix (Estimated ₹1.2L - ₹2.5L)';
-    if (nodeCount <= 150) return 'Multi-Area Hub Density (Estimated ₹3.5L - ₹6L)';
-    return 'Metro Domination Expansion (Custom Enterprise Budgeting)';
+    if (nodeCount <= 20) return 'Local Area Pilot (Estimated $750 - $1,500 CAD)';
+    if (nodeCount <= 75) return 'Suburban Dominance Mix (Estimated $2,000 - $4,500 CAD)';
+    if (nodeCount <= 150) return 'Multi-Area Hub Density (Estimated $6,000 - $12,000 CAD)';
+    return 'National Retail Domination (Custom Enterprise Budgeting)';
   }, [telemetryStats.storeCount]);
 
   // Navigation callbacks
@@ -159,8 +159,8 @@ export default function FullScreenPlannerModal({ isOpen, onClose }: FullScreenPl
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className="fixed inset-0 bg-obsidian flex flex-col justify-between"
-          style={{ backgroundColor: '#0C0C0E', zIndex: 99999, position: 'fixed', overflowY: 'auto' }}
+          className="fixed inset-0 flex flex-col justify-between"
+          style={{ backgroundColor: '#0C0C0E', zIndex: 99999, position: 'fixed', overflowY: 'auto', color: '#FFFFFF' }}
         >
           {/* Cyber Grid Background */}
           <div className="absolute inset-0 bg-glowing-grid opacity-[0.02] pointer-events-none" />
@@ -190,7 +190,7 @@ export default function FullScreenPlannerModal({ isOpen, onClose }: FullScreenPl
                       s.step === currentStep 
                         ? 'w-10 bg-amber' 
                         : s.step < currentStep 
-                          ? 'w-4 bg-signal-green' 
+                          ? 'w-4 bg-blue-600' 
                           : 'w-4 bg-white/10'
                     }`}
                     title={s.label}
@@ -223,7 +223,7 @@ export default function FullScreenPlannerModal({ isOpen, onClose }: FullScreenPl
                 >
                   <div className="text-center max-w-2xl mx-auto mb-12">
                     <span className="text-[10px] mono text-amber uppercase tracking-widest block mb-2">STEP 01 // GOAL & TARGET COEFFS</span>
-                    <h2 className="text-4xl lg:text-5xl font-bold uppercase tracking-tight text-dirty-white">
+                    <h2 className="text-4xl lg:text-5xl font-bold uppercase tracking-tight text-white">
                       Campaign Objective & Projected Scale
                     </h2>
                   </div>
@@ -244,12 +244,12 @@ export default function FullScreenPlannerModal({ isOpen, onClose }: FullScreenPl
                             <motion.div
                               key={obj.id}
                               onClick={() => setPlanObjective(obj.id)}
-                              whileHover={{ y: -3, scale: 1.01, borderColor: isSelected ? '#C97320' : 'rgba(201, 115, 32, 0.4)' }}
+                              whileHover={{ y: -3, scale: 1.01, borderColor: isSelected ? '#FFB000' : 'rgba(255, 176, 0, 0.4)' }}
                               whileTap={{ scale: 0.99 }}
                               transition={{ duration: 0.2 }}
                               className={`p-6 rounded-2xl border cursor-pointer group transition-all flex flex-col justify-between h-[156px] ${
                                 isSelected 
-                                  ? 'bg-[#111114]/90 border-amber shadow-[0_0_15px_rgba(201,115,32,0.12)]' 
+                                  ? 'bg-[#111114]/90 border-amber shadow-[0_0_15px_rgba(255,176,0,0.12)]' 
                                   : 'bg-[#111114]/40 border-white/5'
                               }`}
                             >
@@ -257,12 +257,12 @@ export default function FullScreenPlannerModal({ isOpen, onClose }: FullScreenPl
                                 <div className={`p-2.5 rounded-lg ${isSelected ? 'bg-amber/10 text-amber' : 'bg-white/5 text-white/40 group-hover:text-white/60'} transition-all`}>
                                   <IconComp size={16} />
                                 </div>
-                                <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${isSelected ? 'border-amber bg-amber text-obsidian' : 'border-white/10'}`}>
+                                <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${isSelected ? 'border-amber bg-amber text-slate-900' : 'border-white/10'}`}>
                                   {isSelected && <Check size={12} strokeWidth={3.5} />}
                                 </div>
                               </div>
                               <div>
-                                <h4 className="text-sm font-bold uppercase tracking-wide text-dirty-white mb-1">{obj.label}</h4>
+                                <h4 className="text-sm font-bold uppercase tracking-wide text-white mb-1">{obj.label}</h4>
                                 <p className="text-xs text-white/55 leading-relaxed line-clamp-2">{obj.desc}</p>
                               </div>
                             </motion.div>
@@ -300,13 +300,13 @@ export default function FullScreenPlannerModal({ isOpen, onClose }: FullScreenPl
                       <div className="border-t border-white/5 pt-6 grid grid-cols-2 gap-4">
                         <div className="bg-[#0C0C0E]/60 border border-white/5 p-4 rounded-xl">
                           <span className="text-[10px] mono text-white/35 uppercase block mb-1">Est. Local Reach</span>
-                          <div className="text-xl font-bold text-dirty-white mono">
+                          <div className="text-xl font-bold text-white mono">
                             <AnimatedNumber value={telemetryStats.reach / 1000} suffix="K" />
                           </div>
                         </div>
                         <div className="bg-[#0C0C0E]/60 border border-white/5 p-4 rounded-xl">
                           <span className="text-[10px] mono text-white/35 uppercase block mb-1">Active Nodes</span>
-                          <div className="text-xl font-bold text-dirty-white mono">
+                          <div className="text-xl font-bold text-white mono">
                             <AnimatedNumber value={telemetryStats.storeCount} suffix=" stores" />
                           </div>
                         </div>
@@ -329,7 +329,7 @@ export default function FullScreenPlannerModal({ isOpen, onClose }: FullScreenPl
                 >
                   <div className="text-center max-w-2xl mx-auto mb-12">
                     <span className="text-[10px] mono text-amber uppercase tracking-widest block mb-2">STEP 02 // CHANNELS</span>
-                    <h2 className="text-4xl lg:text-5xl font-bold uppercase tracking-tight text-dirty-white">
+                    <h2 className="text-4xl lg:text-5xl font-bold uppercase tracking-tight text-white">
                       Target Retail Channels
                     </h2>
                     <p className="text-sm text-white/55 mt-2 leading-relaxed">Select one or multiple neighborhood retail networks for your campaign.</p>
@@ -343,21 +343,21 @@ export default function FullScreenPlannerModal({ isOpen, onClose }: FullScreenPl
                         <motion.div
                           key={env.id}
                           onClick={() => toggleEnvironment(env.id)}
-                          whileHover={{ y: -3, scale: 1.01, borderColor: isSelected ? '#C97320' : 'rgba(201, 115, 32, 0.4)' }}
+                          whileHover={{ y: -3, scale: 1.01, borderColor: isSelected ? '#FFB000' : 'rgba(255, 176, 0, 0.4)' }}
                           whileTap={{ scale: 0.99 }}
                           transition={{ duration: 0.2 }}
                           className={`p-6 rounded-2xl border cursor-pointer group transition-all flex flex-col justify-between h-[156px] bg-[#111114] ${
                             isSelected 
-                              ? 'border-amber shadow-[0_0_15px_rgba(201,115,32,0.12)]' 
+                              ? 'border-amber shadow-[0_0_15px_rgba(255,176,0,0.12)]' 
                               : 'border-white/5'
                           }`}
                         >
                           <div className="flex justify-between items-start">
-                            <span className="text-sm font-bold uppercase tracking-wide text-dirty-white leading-tight">
+                            <span className="text-sm font-bold uppercase tracking-wide text-white leading-tight">
                               {env.label}
                             </span>
                             <div className={`w-4 h-4 rounded-md border flex items-center justify-center transition-colors ${
-                              isSelected ? 'border-amber bg-amber text-obsidian' : 'border-white/10'
+                              isSelected ? 'border-amber bg-amber text-slate-900' : 'border-white/10'
                             }`}>
                               {isSelected && <Check size={10} strokeWidth={3} />}
                             </div>
@@ -386,7 +386,7 @@ export default function FullScreenPlannerModal({ isOpen, onClose }: FullScreenPl
                 >
                   <div className="text-center max-w-2xl mx-auto mb-12">
                     <span className="text-[10px] mono text-amber uppercase tracking-widest block mb-2">STEP 03 // AD FORMATS</span>
-                    <h2 className="text-4xl lg:text-5xl font-bold uppercase tracking-tight text-dirty-white">
+                    <h2 className="text-4xl lg:text-5xl font-bold uppercase tracking-tight text-white">
                       Select High-Visibility Media Formats
                     </h2>
                   </div>
@@ -399,21 +399,21 @@ export default function FullScreenPlannerModal({ isOpen, onClose }: FullScreenPl
                         <motion.div
                           key={fmt.id}
                           onClick={() => toggleFormat(fmt.id)}
-                          whileHover={{ y: -3, scale: 1.01, borderColor: isSelected ? '#C97320' : 'rgba(201, 115, 32, 0.4)' }}
+                          whileHover={{ y: -3, scale: 1.01, borderColor: isSelected ? '#FFB000' : 'rgba(255, 176, 0, 0.4)' }}
                           whileTap={{ scale: 0.99 }}
                           transition={{ duration: 0.2 }}
                           className={`p-6 rounded-2xl border cursor-pointer group transition-all flex flex-col justify-between h-[156px] bg-[#111114] ${
                             isSelected 
-                              ? 'border-amber shadow-[0_0_15px_rgba(201,115,32,0.12)]' 
+                              ? 'border-amber shadow-[0_0_15px_rgba(255,176,0,0.12)]' 
                               : 'border-white/5'
                           }`}
                         >
                           <div className="flex justify-between items-start">
-                            <span className="text-sm font-bold uppercase tracking-wide text-dirty-white leading-tight">
+                            <span className="text-sm font-bold uppercase tracking-wide text-white leading-tight">
                               {fmt.label}
                             </span>
                             <div className={`w-4 h-4 rounded-md border flex items-center justify-center transition-colors ${
-                              isSelected ? 'border-amber bg-amber text-obsidian' : 'border-white/10'
+                              isSelected ? 'border-amber bg-amber text-slate-900' : 'border-white/10'
                             }`}>
                               {isSelected && <Check size={10} strokeWidth={3} />}
                             </div>
@@ -451,17 +451,17 @@ export default function FullScreenPlannerModal({ isOpen, onClose }: FullScreenPl
                     </div>
 
                     <div className="bg-[#111114]/50 border border-white/5 rounded-2xl p-5 flex flex-col justify-between">
-                      <label className="text-[11px] mono text-white/45 uppercase tracking-[0.2em] mb-2 block">Target Metopolitan Zone</label>
+                      <label className="text-[11px] mono text-white/45 uppercase tracking-[0.2em] mb-2 block">Target Metropolitan Zone</label>
                       <select
                         value={leadCity}
                         onChange={(e) => setLeadCity(e.target.value)}
                         className="w-full h-14 bg-[#0C0C0E] border border-white/10 rounded-xl px-4 text-base text-white/85 focus:border-amber/50 outline-none transition-colors appearance-none cursor-pointer"
                       >
-                        <option value="Mumbai Metropolitan Region (MMR)">Mumbai Region (MMR)</option>
-                        <option value="Delhi NCR">Delhi NCR Hub</option>
-                        <option value="Bengaluru Urban">Bengaluru Urban Hub</option>
-                        <option value="Hyderabad Region">Hyderabad Hub</option>
-                        <option value="Chennai Metro">Chennai Hub</option>
+                        <option value="Greater Toronto Area (GTA)">Greater Toronto Area (GTA)</option>
+                        <option value="Metro Vancouver">Metro Vancouver Hub</option>
+                        <option value="Greater Montreal">Greater Montreal Hub</option>
+                        <option value="Calgary-Edmonton Corridor">Calgary-Edmonton Corridor</option>
+                        <option value="Halifax Regional Municipality">Halifax Municipality</option>
                       </select>
                     </div>
                   </div>
@@ -483,11 +483,11 @@ export default function FullScreenPlannerModal({ isOpen, onClose }: FullScreenPl
                       <span className="text-[10px] mono text-amber uppercase tracking-widest block mb-1">
                         COMPILE_COMPLETE // MODEL_OUTPUT
                       </span>
-                      <h3 className="text-2xl font-bold uppercase tracking-tight text-dirty-white">
+                      <h3 className="text-2xl font-bold uppercase tracking-tight text-white">
                         Recommended Campaign Blueprint
                       </h3>
                     </div>
-                    <div className="inline-flex items-center gap-2 bg-signal-green/10 border border-signal-green/20 px-3 py-1 rounded-full text-signal-green text-[8px] mono uppercase tracking-wider">
+                    <div className="inline-flex items-center gap-2 bg-blue-600/10 border border-blue-600/20 px-3 py-1 rounded-full text-blue-400 text-[8px] mono uppercase tracking-wider">
                       <Radio size={9} className="animate-pulse" /> Algorithmic Mix Secured
                     </div>
                   </div>
@@ -538,13 +538,13 @@ export default function FullScreenPlannerModal({ isOpen, onClose }: FullScreenPl
                       <div className="space-y-2">
                         <div>
                           <span className="text-[7px] text-white/20 block uppercase">Est. Monthly Reach</span>
-                          <span className="text-base font-bold text-dirty-white mono">
+                          <span className="text-base font-bold text-white mono">
                             <AnimatedNumber value={telemetryStats.reach / 1000} suffix="K" /> Unique eyes
                           </span>
                         </div>
                         <div>
                           <span className="text-[7px] text-white/20 block uppercase">Active Network Nodes</span>
-                          <span className="text-xs font-bold text-dirty-white mono">
+                          <span className="text-xs font-bold text-white mono">
                             {telemetryStats.storeCount} stores
                           </span>
                         </div>
@@ -557,7 +557,7 @@ export default function FullScreenPlannerModal({ isOpen, onClose }: FullScreenPl
                         SCHEDULE TIMELINE
                       </span>
                       <div className="space-y-2">
-                        <div className="text-xl font-bold text-dirty-white mono italic font-serif">
+                        <div className="text-xl font-bold text-white mono italic font-serif">
                           {planDuration} Days
                         </div>
                         <p className="text-[9px] text-white/30 leading-relaxed font-light">
@@ -593,19 +593,19 @@ export default function FullScreenPlannerModal({ isOpen, onClose }: FullScreenPl
                       </span>
                       <div className="grid grid-cols-2 gap-2.5 text-[9px] text-white/60 font-light">
                         <div className="flex items-center gap-2">
-                          <ShieldCheck size={11} className="text-signal-green" />
+                          <ShieldCheck size={11} className="text-blue-500" />
                           <span>Geo-tagged verification</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <ShieldCheck size={11} className="text-signal-green" />
+                          <ShieldCheck size={11} className="text-blue-500" />
                           <span>AI image validation</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <ShieldCheck size={11} className="text-signal-green" />
+                          <ShieldCheck size={11} className="text-blue-500" />
                           <span>Live Terminal Access</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <ShieldCheck size={11} className="text-signal-green" />
+                          <ShieldCheck size={11} className="text-blue-500" />
                           <span>Weekly logistics reports</span>
                         </div>
                       </div>
@@ -616,7 +616,7 @@ export default function FullScreenPlannerModal({ isOpen, onClose }: FullScreenPl
                   <div className="flex justify-end pt-4 border-t border-white/5">
                     <button
                       onClick={() => setShowBriefForm(true)}
-                      className="btn-molten h-[50px] px-6 flex items-center gap-2 font-bold uppercase tracking-wider text-xs shadow-[0_0_20px_rgba(201,115,32,0.15)] text-obsidian"
+                      className="btn-molten h-[50px] px-6 flex items-center gap-2 font-bold uppercase tracking-wider text-xs shadow-[0_0_20px_rgba(255,176,0,0.15)] text-slate-900"
                     >
                       <span>Request Detailed Media Plan Proposal</span>
                       <ArrowRight size={12} />
@@ -637,7 +637,7 @@ export default function FullScreenPlannerModal({ isOpen, onClose }: FullScreenPl
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-[9px] font-bold uppercase tracking-wider transition-all ${
                   currentStep === 1 
                     ? 'opacity-20 border-white/5 text-white/20 cursor-not-allowed' 
-                    : 'bg-white/5 border-white/10 hover:bg-white/10 text-dirty-white'
+                    : 'bg-white/5 border-white/10 hover:bg-white/10 text-white'
                 }`}
               >
                 <ChevronLeft size={12} />
@@ -646,7 +646,7 @@ export default function FullScreenPlannerModal({ isOpen, onClose }: FullScreenPl
 
               <button
                 onClick={handleNext}
-                className="btn-molten flex items-center gap-2 px-5 py-3 text-[9px] font-bold uppercase tracking-wider shadow-[0_0_15px_rgba(201,115,32,0.15)] text-obsidian"
+                className="btn-molten flex items-center gap-2 px-5 py-3 text-[9px] font-bold uppercase tracking-wider shadow-[0_0_15px_rgba(255,176,0,0.15)] text-slate-900"
               >
                 <span>Next Step</span>
                 <ChevronRight size={12} />
@@ -663,8 +663,7 @@ export default function FullScreenPlannerModal({ isOpen, onClose }: FullScreenPl
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   onClick={() => setShowBriefForm(false)}
-                  className="absolute inset-0 bg-obsidian/95 backdrop-blur-md"
-                  style={{ backgroundColor: 'rgba(12, 12, 14, 0.95)' }}
+                  className="absolute inset-0 bg-[#0C0C0E]/95 backdrop-blur-md"
                 />
 
                 <motion.div
@@ -672,7 +671,7 @@ export default function FullScreenPlannerModal({ isOpen, onClose }: FullScreenPl
                   animate={{ scale: 1, opacity: 1, y: 0 }}
                   exit={{ scale: 0.95, opacity: 0, y: 15 }}
                   transition={{ type: 'spring', duration: 0.4 }}
-                  className="relative w-full max-w-[500px] bg-[#111114] border border-white/10 rounded-2xl p-6 lg:p-8 shadow-2xl overflow-hidden"
+                  className="relative w-full max-w-[500px] bg-[#111114] border border-white/10 rounded-2xl p-6 lg:p-8 shadow-2xl overflow-hidden animate-none"
                   style={{ zIndex: 100001, position: 'relative' }}
                 >
                   <button
@@ -695,7 +694,7 @@ export default function FullScreenPlannerModal({ isOpen, onClose }: FullScreenPl
                           <span className="text-[8px] mono text-amber uppercase tracking-widest block mb-1">
                             OPTIONAL HYPERLOCAL QUALIFICATION
                           </span>
-                          <h3 className="text-xl font-bold text-dirty-white tracking-tight uppercase">
+                          <h3 className="text-xl font-bold text-white tracking-tight uppercase">
                             Request Media Proposal
                           </h3>
                         </div>
@@ -708,9 +707,9 @@ export default function FullScreenPlannerModal({ isOpen, onClose }: FullScreenPl
                                 type="text"
                                 value={leadName}
                                 onChange={(e) => setLeadName(e.target.value)}
-                                placeholder="Rahul Sharma"
+                                placeholder="David Campbell"
                                 required
-                                className="w-full bg-[#0C0C0E] border border-white/10 rounded-lg px-3 py-3 text-sm text-dirty-white focus:border-amber/50 outline-none transition-colors"
+                                className="w-full bg-[#0C0C0E] border border-white/10 rounded-lg px-3 py-3 text-sm text-white focus:border-amber/50 outline-none transition-colors"
                               />
                             </div>
                             <div className="space-y-1">
@@ -719,9 +718,9 @@ export default function FullScreenPlannerModal({ isOpen, onClose }: FullScreenPl
                                 type="text"
                                 value={leadCompany}
                                 onChange={(e) => setLeadCompany(e.target.value)}
-                                placeholder="Coca-Cola India"
+                                placeholder="Coca-Cola Canada"
                                 required
-                                className="w-full bg-[#0C0C0E] border border-white/10 rounded-lg px-3 py-3 text-sm text-dirty-white focus:border-amber/50 outline-none transition-colors"
+                                className="w-full bg-[#0C0C0E] border border-white/10 rounded-lg px-3 py-3 text-sm text-white focus:border-amber/50 outline-none transition-colors"
                               />
                             </div>
                           </div>
@@ -735,7 +734,7 @@ export default function FullScreenPlannerModal({ isOpen, onClose }: FullScreenPl
                                 onChange={(e) => setLeadBrand(e.target.value)}
                                 placeholder="Sprite"
                                 required
-                                className="w-full bg-[#0C0C0E] border border-white/10 rounded-lg px-3 py-3 text-sm text-dirty-white focus:border-amber/50 outline-none transition-colors"
+                                className="w-full bg-[#0C0C0E] border border-white/10 rounded-lg px-3 py-3 text-sm text-white focus:border-amber/50 outline-none transition-colors"
                               />
                             </div>
                             <div className="space-y-1">
@@ -744,9 +743,9 @@ export default function FullScreenPlannerModal({ isOpen, onClose }: FullScreenPl
                                 type="email"
                                 value={leadEmail}
                                 onChange={(e) => setLeadEmail(e.target.value)}
-                                placeholder="rahul@company.com"
+                                placeholder="david@company.ca"
                                 required
-                                className="w-full bg-[#0C0C0E] border border-white/10 rounded-lg px-3 py-3 text-sm text-dirty-white focus:border-amber/50 outline-none transition-colors"
+                                className="w-full bg-[#0C0C0E] border border-white/10 rounded-lg px-3 py-3 text-sm text-white focus:border-amber/50 outline-none transition-colors"
                               />
                             </div>
                           </div>
@@ -758,9 +757,9 @@ export default function FullScreenPlannerModal({ isOpen, onClose }: FullScreenPl
                                 type="tel"
                                 value={leadPhone}
                                 onChange={(e) => setLeadPhone(e.target.value)}
-                                placeholder="+91 XXXXX XXXXX"
+                                placeholder="+1 (416) 555-0199"
                                 required
-                                className="w-full bg-[#0C0C0E] border border-white/10 rounded-lg px-3 py-3 text-sm text-dirty-white focus:border-amber/50 outline-none transition-colors"
+                                className="w-full bg-[#0C0C0E] border border-white/10 rounded-lg px-3 py-3 text-sm text-white focus:border-amber/50 outline-none transition-colors"
                               />
                             </div>
                             <div className="space-y-1">
@@ -770,7 +769,7 @@ export default function FullScreenPlannerModal({ isOpen, onClose }: FullScreenPl
                                 value={leadCity}
                                 onChange={(e) => setLeadCity(e.target.value)}
                                 required
-                                className="w-full bg-[#0C0C0E] border border-white/10 rounded-lg px-3 py-3 text-sm text-dirty-white focus:border-amber/50 outline-none transition-colors"
+                                className="w-full bg-[#0C0C0E] border border-white/10 rounded-lg px-3 py-3 text-sm text-white focus:border-amber/50 outline-none transition-colors"
                               />
                             </div>
                           </div>
@@ -792,7 +791,7 @@ export default function FullScreenPlannerModal({ isOpen, onClose }: FullScreenPl
                                 className="absolute inset-0 opacity-0 cursor-pointer"
                               />
                               {leadBriefFile && (
-                                <span className="text-[9px] text-signal-green mono mt-0.5 font-bold">
+                                <span className="text-[9px] text-blue-400 mono mt-0.5 font-bold">
                                   ✓ {leadBriefFile} Selected
                                 </span>
                               )}
@@ -802,7 +801,7 @@ export default function FullScreenPlannerModal({ isOpen, onClose }: FullScreenPl
                           <div className="pt-3 flex flex-col gap-2">
                             <button
                               type="submit"
-                              className="w-full btn-molten h-[46px] flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider text-obsidian"
+                              className="w-full btn-molten h-[46px] flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-900"
                             >
                               <span>Request Proposal Plan</span>
                               <ArrowRight size={12} />
@@ -831,10 +830,10 @@ export default function FullScreenPlannerModal({ isOpen, onClose }: FullScreenPl
                         exit={{ opacity: 0 }}
                         className="flex flex-col items-center justify-center py-8 text-center"
                       >
-                        <div className="w-12 h-12 bg-signal-green/10 border border-signal-green/30 rounded-full flex items-center justify-center text-signal-green mb-4 shadow-[0_0_15px_rgba(0,255,133,0.15)] animate-bounce">
+                        <div className="w-12 h-12 bg-blue-600/10 border border-blue-600/30 rounded-full flex items-center justify-center text-blue-400 mb-4 shadow-[0_0_15px_rgba(37,99,235,0.15)] animate-bounce">
                           <Check size={20} strokeWidth={3} />
                         </div>
-                        <h3 className="text-lg font-bold text-dirty-white tracking-tight uppercase mb-1">
+                        <h3 className="text-lg font-bold text-white tracking-tight uppercase mb-1">
                           Proposal Queued
                         </h3>
                         <p className="text-[10px] text-white/40 leading-relaxed max-w-[240px]">
@@ -845,7 +844,7 @@ export default function FullScreenPlannerModal({ isOpen, onClose }: FullScreenPl
                             initial={{ width: 0 }}
                             animate={{ width: '100%' }}
                             transition={{ duration: 1.8 }}
-                            className="h-full bg-signal-green"
+                            className="h-full bg-blue-600"
                           />
                         </div>
                       </motion.div>

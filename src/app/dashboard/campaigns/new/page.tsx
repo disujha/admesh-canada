@@ -1,818 +1,724 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { motion } from 'framer-motion';
-import { Send, CheckCircle2, Layers, MapPin, Clock3, Store, LayoutTemplate, Eye, X, Package, Pill, ShoppingBasket, Coffee, Scissors, Smartphone, Building2, Zap, Calendar, CalendarRange } from 'lucide-react';
+import { 
+  Send, 
+  CheckCircle2, 
+  MapPin, 
+  Store, 
+  X, 
+  Plus, 
+  Calendar, 
+  Sparkles, 
+  DollarSign, 
+  TrendingUp, 
+  Users, 
+  Upload,
+  ArrowRight,
+  ArrowLeft,
+  Check
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-type AdFormat = {
+type PlacementType = {
   id: string;
   name: string;
-  retailType: string;
+  useCase: string;
+  visibility: string;
+  costPerStore: number;
   imageUrl: string;
-  sizeOptions: string[];
-  description: string;
-  material: string;
-  printType: string;
-  visibilityScore: string;
-  advantage: string;
+  recommendedObjectives: string[];
 };
 
-const AD_FORMATS: AdFormat[] = [
+const PLACEMENTS: PlacementType[] = [
   {
-    id: 'counter-sticker',
-    name: 'A4 Counter Sticker',
-    retailType: 'Kirana • Pharmacy • Tea Stall',
-    imageUrl: '/images/admesh-counter-promo-card.png',
-    sizeOptions: ['A4 (297 x 210 mm)', 'A5 (210 x 148 mm)'],
-    description: 'High visibility adhesive stickers placed near billing counters.',
-    material: 'Pre-laminated high-tac vinyl',
-    printType: 'UV Digital Print',
-    visibilityScore: '8.2 / 10',
-    advantage: 'Captures attention at the point of sale during transaction checkout.',
-  },
-  {
-    id: 'countertop-display',
-    name: 'Countertop Display',
-    retailType: 'Kirana • Pharmacy • Cafe',
-    imageUrl: '/images/admesh-countertop-display-unit.png',
-    sizeOptions: ['Small (150 x 100 mm)', 'Medium (210 x 148 mm)', 'Large (297 x 210 mm)'],
-    description: 'Premium acrylic and board units placed adjacent to cash tills.',
-    material: 'Premium 3mm gloss acrylic',
-    printType: 'High-resolution digital print',
-    visibilityScore: '8.6 / 10',
-    advantage: '3D structural placement ensures active eye-level gaze tracking.',
-  },
-  {
-    id: 'dangler',
-    name: 'Hanging Dangler',
-    retailType: 'Kirana • Salon • Supermarket',
-    imageUrl: '/images/admesh-aisle-dangler.png',
-    sizeOptions: ['300 x 300 mm', '450 x 450 mm'],
-    description: 'Double-sided suspended cards creating overhead visual loops.',
-    material: '350 GSM double-side printed card',
-    printType: 'Double-sided offset print',
-    visibilityScore: '8.4 / 10',
-    advantage: 'Extended dwell visibility hanging directly above product aisles.',
+    id: 'storefront-poster',
+    name: 'Storefront Posters',
+    useCase: 'Drives high-impact street-level awareness to foot traffic before store entry.',
+    visibility: 'Very High (9.1/10)',
+    costPerStore: 150,
+    imageUrl: '/images/admesh-instore-poster-display.png',
+    recommendedObjectives: ['Brand Awareness', 'Seasonal Promotion', 'Local Marketing']
   },
   {
     id: 'shelf-branding',
     name: 'Shelf Branding',
-    retailType: 'Kirana • Pharmacy • Supermarket',
+    useCase: 'Category highlight strips to steer instant brand recognition and shelf choice.',
+    visibility: 'High (8.9/10)',
+    costPerStore: 120,
     imageUrl: '/images/admesh-shelf-edge-branding.png',
-    sizeOptions: ['600 x 40 mm', '900 x 40 mm', '1200 x 50 mm'],
-    description: 'High-yield category dividers and horizontal shelf highlight strips.',
-    material: 'Scratch-proof rigid PVC strips',
-    printType: 'UV-resistant digital print',
-    visibilityScore: '8.9 / 10',
-    advantage: 'Drives instant in-category brand recognition and impulse buys.',
+    recommendedObjectives: ['Product Launch', 'Sales Campaign', 'Seasonal Promotion']
   },
   {
-    id: 'wall-poster',
-    name: 'Wall Poster',
-    retailType: 'Cafe • Tea Stall • Salon',
-    imageUrl: '/images/admesh-instore-poster-display.png',
-    sizeOptions: ['A2 (594 x 420 mm)', 'A1 (841 x 594 mm)'],
-    description: 'Sleek premium indoor posters positioned in high-dwell spaces.',
-    material: '220 GSM gloss poster paper',
-    printType: 'High-quality offset print',
-    visibilityScore: '8.7 / 10',
-    advantage: 'High-contrast branding aligned to seating spots and social areas.',
-  },
-  {
-    id: 'flex-banner',
-    name: 'Flex Banner',
-    retailType: 'Kirana • Mobile Shop • Cafe',
-    imageUrl: '/images/admesh-exterior-flex-banner.png',
-    sizeOptions: ['4 x 2 ft', '6 x 3 ft', '8 x 4 ft'],
-    description: 'Weatherproof heavy-duty outdoor banners mounted on facades.',
-    material: '440 GSM frontlit matte flex sheet',
-    printType: 'Large format solvent print',
-    visibilityScore: '9.1 / 10',
-    advantage: 'Deep street exposure capturing neighborhood foot traffic 24/7.',
-  },
-  {
-    id: 'shutter-branding',
-    name: 'Shop Shutter Branding',
-    retailType: 'Kirana • Pharmacy • Salon',
-    imageUrl: '/images/admesh-shutter-branding.png',
-    sizeOptions: ['Single Shutter', 'Double Shutter', 'Full Frontage'],
-    description: 'Massive outdoor full-shutter wraps visible during off-hours.',
-    material: 'Industrial flexible adhesive vinyl',
-    printType: 'Solvent-based digital print',
-    visibilityScore: '9.3 / 10',
-    advantage: 'Dominates neighborhood streets when markets are closed.',
+    id: 'counter-display',
+    name: 'Counter Displays',
+    useCase: '3D structural placement at cash registers for active impulse gaze tracking.',
+    visibility: 'Excellent (8.6/10)',
+    costPerStore: 180,
+    imageUrl: '/images/admesh-countertop-display-unit.png',
+    recommendedObjectives: ['Product Launch', 'Sales Campaign']
   },
   {
     id: 'digital-display',
-    name: 'Digital Display Screen',
-    retailType: 'Cafe • Pharmacy • Supermarket',
+    name: 'Digital Displays',
+    useCase: 'Plug-and-play digital scheduling for dynamic in-store media campaigns.',
+    visibility: 'High (8.7/10)',
+    costPerStore: 250,
     imageUrl: '/images/admesh-smart-digital-screen.png',
-    sizeOptions: ['24 inch', '32 inch', '43 inch'],
-    description: 'Smart connected display screens running automated video ads.',
-    material: 'Plug-and-play smart media terminal',
-    printType: 'Digital screen display',
-    visibilityScore: '9.5 / 10',
-    advantage: 'Dynamic digital scheduling, remote updates, and movement capture.',
+    recommendedObjectives: ['Brand Awareness', 'Product Launch', 'Seasonal Promotion']
   },
   {
-    id: 'store-takeover',
-    name: 'Full Store Takeover',
-    retailType: 'Kirana • Pharmacy • Supermarket',
-    imageUrl: '/images/admesh-store-takeover.png',
-    sizeOptions: ['Compact Store', 'Standard Store', 'Large Store'],
-    description: '100% brand dominance wrapping the shop exterior and interior.',
-    material: 'Multi-Asset Complete wrap package including shutters, outer walls, counters, and stickers',
-    printType: 'Mixed media print package',
-    visibilityScore: '9.8 / 10',
-    advantage: 'Maximum impact, turns the entire local store into your brand billboard.',
-  },
+    id: 'window-graphics',
+    name: 'Window Graphics',
+    useCase: 'Double-sided adhesive wraps catching attention during doors opening.',
+    visibility: 'Good (8.2/10)',
+    costPerStore: 100,
+    imageUrl: '/images/admesh-counter-promo-card.png',
+    recommendedObjectives: ['Brand Awareness', 'Local Marketing']
+  }
 ];
 
-const RETAIL_TYPES = ['Kirana', 'Pharmacy', 'Supermarket', 'Tea Stall', 'Cafe', 'Salon/Spa', 'Mobile Shop', 'Modern Retail'];
-const TIMELINE_OPTIONS = ['Within 7 days', 'Within 14 days', 'Within 21 days', 'Within 30 days'];
-const CITIES = ['Mumbai', 'Delhi', 'Bengaluru', 'Hyderabad', 'Chennai', 'Pune'];
+const PROVINCES = ['Ontario', 'Quebec', 'British Columbia', 'Alberta', 'Nova Scotia', 'Manitoba', 'Saskatchewan'];
+const OBJECTIVES = ['Brand Awareness', 'Product Launch', 'Seasonal Promotion', 'Sales Campaign', 'Local Marketing'];
+const STORE_CATEGORIES = ['Convenience Stores', 'Pharmacies', 'Cafe & Coffee Shops', 'Supermarkets', 'Gas Stations'];
 
-const TIMELINE_CARDS = [
-  {
-    id: 'Within 7 days',
-    label: 'Express Deployment',
-    duration: 'Within 7 days',
-    description: 'High-speed rollout for urgent visual campaigns.',
-    icon: Zap,
-    badge: 'Fast Track',
-  },
-  {
-    id: 'Within 14 days',
-    label: 'Standard Rollout',
-    duration: 'Within 14 days',
-    description: 'Our most popular optimized setup timeline.',
-    icon: Calendar,
-    badge: 'Popular',
-  },
-  {
-    id: 'Within 21 days',
-    label: 'Strategic Planned',
-    duration: 'Within 21 days',
-    description: 'Perfect for scheduled launches and coordinates.',
-    icon: Clock3,
-  },
-  {
-    id: 'Within 30 days',
-    label: 'Flexible Horizon',
-    duration: 'Within 30 days',
-    description: 'Optimized rates and maximum customizability.',
-    icon: CalendarRange,
-  },
-];
-
-const RETAIL_TYPE_ICON_MAP: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
-  Kirana: ShoppingBasket,
-  Pharmacy: Pill,
-  Supermarket: Store,
-  'Tea Stall': Coffee,
-  Cafe: Coffee,
-  'Salon/Spa': Scissors,
-  'Mobile Shop': Smartphone,
-  'Modern Retail': Building2,
-};
-
-const getSizeShape = (size: string): 'vertical' | 'horizontal' | 'square' => {
-  const normalized = size.toLowerCase();
-  if (normalized.includes('300 x 300') || normalized.includes('450 x 450') || normalized.includes('single shutter') || normalized.includes('double shutter') || normalized.includes('full frontage')) {
-    return 'square';
-  }
-  const match = normalized.match(/(\d+)\s*x\s*(\d+)/);
-  if (match) {
-    const w = Number(match[1]);
-    const h = Number(match[2]);
-    if (!Number.isNaN(w) && !Number.isNaN(h)) {
-      if (w > h) return 'horizontal';
-      if (h > w) return 'vertical';
-      return 'square';
-    }
-  }
-  if (normalized.includes('a4') || normalized.includes('a5') || normalized.includes('a2') || normalized.includes('a1')) return 'vertical';
-  return 'horizontal';
-};
-
-const CreateCampaignRequest = () => {
+export default function StrategistCampaignWizard() {
   const { user, profile } = useAuth();
   const router = useRouter();
 
+  const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [currentStep, setCurrentStep] = useState(1);
-  const [viewModalOpen, setViewModalOpen] = useState(false);
-  const [selectedFormatForView, setSelectedFormatForView] = useState<AdFormat | null>(null);
 
   const [formData, setFormData] = useState({
-    adFormatId: AD_FORMATS[0].id,
-    adSize: AD_FORMATS[0].sizeOptions[0],
-    retailTypes: [] as string[],
-    outletCount: '100',
-    timeline: TIMELINE_OPTIONS[1],
-    targetLocations: [] as string[],
-    campaignObjective: '',
-    useCustomMaterial: false,
-    customMaterialDetails: '',
-    pickupLocation: '',
+    name: '',
+    brandName: '',
+    productName: '',
+    objective: 'Brand Awareness',
+    province: 'Ontario',
+    city: 'Toronto',
+    storeCategories: [] as string[],
+    budget: 25000,
+    startDate: '',
+    endDate: '',
+    selectedPlacements: [] as string[],
+    artworkUrl: '' as string | null,
+    artworkName: ''
   });
 
-  const selectedFormat = useMemo(
-    () => AD_FORMATS.find((f) => f.id === formData.adFormatId) ?? AD_FORMATS[0],
-    [formData.adFormatId]
-  );
+  const [aiPrompt, setAiPrompt] = useState('');
+  const [generatingAi, setGeneratingAi] = useState(false);
+  const [aiStatus, setAiStatus] = useState('');
 
-  const toggleRetailType = (type: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      retailTypes: prev.retailTypes.includes(type)
-        ? prev.retailTypes.filter((t) => t !== type)
-        : [...prev.retailTypes, type],
-    }));
-  };
-
-  const toggleCity = (city: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      targetLocations: prev.targetLocations.includes(city)
-        ? prev.targetLocations.filter((c) => c !== city)
-        : [...prev.targetLocations, city],
-    }));
-  };
-
-  const onFormatChange = (formatId: string) => {
-    const format = AD_FORMATS.find((f) => f.id === formatId);
-    if (!format) return;
-    setFormData((prev) => ({
-      ...prev,
-      adFormatId: format.id,
-      adSize: format.sizeOptions[0],
-    }));
-  };
-
-  const openViewModal = (format: AdFormat) => {
-    setSelectedFormatForView(format);
-    setViewModalOpen(true);
-  };
-
-  const closeViewModal = () => {
-    setViewModalOpen(false);
-    setSelectedFormatForView(null);
-  };
-
-  const isValid =
-    !!formData.adFormatId &&
-    !!formData.adSize &&
-    formData.retailTypes.length > 0 &&
-    Number(formData.outletCount) > 0 &&
-    formData.targetLocations.length > 0 &&
-    !!formData.timeline &&
-    (!formData.useCustomMaterial || (formData.customMaterialDetails && formData.pickupLocation));
-
-  const totalSteps = 5;
-  const isStepValid = (step: number) => {
-    if (step === 1) return !!formData.adFormatId;
-    if (step === 2) {
-      return !!formData.adSize && (!formData.useCustomMaterial || (!!formData.customMaterialDetails && !!formData.pickupLocation));
-    }
-    if (step === 3) return formData.retailTypes.length > 0 && Number(formData.outletCount) > 0 && formData.targetLocations.length > 0;
-    if (step === 4) return !!formData.timeline;
-    return isValid;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleAiSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isValid) return;
+    if (!aiPrompt.trim()) return;
+    setGeneratingAi(true);
+    setAiStatus('Strategizing campaign parameters...');
+    setTimeout(() => {
+      const promptLower = aiPrompt.toLowerCase();
+      let parsedBudget = 25000;
+      const budgetMatch = promptLower.match(/\$?(\d+[\d,]*)/);
+      if (budgetMatch) parsedBudget = parseInt(budgetMatch[1].replace(/,/g, ''));
+      let parsedCity = 'Toronto';
+      let parsedProvince = 'Ontario';
+      if (promptLower.includes('vancouver')) { parsedCity = 'Vancouver'; parsedProvince = 'British Columbia'; }
+      else if (promptLower.includes('montreal') || promptLower.includes('montréal')) { parsedCity = 'Montreal'; parsedProvince = 'Quebec'; }
+      else if (promptLower.includes('calgary')) { parsedCity = 'Calgary'; parsedProvince = 'Alberta'; }
+      let parsedCategory = 'Convenience Stores';
+      if (promptLower.includes('pharmacy') || promptLower.includes('pharmacies')) parsedCategory = 'Pharmacies';
+      else if (promptLower.includes('cafe') || promptLower.includes('coffee')) parsedCategory = 'Cafe & Coffee Shops';
+      else if (promptLower.includes('supermarket')) parsedCategory = 'Supermarkets';
+      let parsedObjective = 'Seasonal Promotion';
+      if (promptLower.includes('awareness') || promptLower.includes('brand')) parsedObjective = 'Brand Awareness';
+      else if (promptLower.includes('launch')) parsedObjective = 'Product Launch';
+      else if (promptLower.includes('sales')) parsedObjective = 'Sales Campaign';
+      setAiStatus('Evaluating audience reach and budget timeline...');
+      setTimeout(() => {
+        setFormData(prev => ({
+          ...prev,
+          name: `AI: Back-to-School Refresh (${parsedCity})`,
+          brandName: profile?.displayName?.split(' ')[0] || 'Coca-Cola',
+          productName: 'Zero Sugar Refresh',
+          objective: parsedObjective,
+          province: parsedProvince,
+          city: parsedCity,
+          storeCategories: [parsedCategory],
+          budget: parsedBudget,
+          startDate: new Date().toISOString().split('T')[0],
+          endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          selectedPlacements: ['storefront-poster', 'shelf-branding'],
+          artworkUrl: '/images/admesh-network.png',
+          artworkName: 'back_to_school_creative.png'
+        }));
+        setGeneratingAi(false);
+        setAiStatus('');
+        setCurrentStep(6);
+      }, 800);
+    }, 800);
+  };
 
+  const estimatedStoreCount = useMemo(() => {
+    if (formData.storeCategories.length === 0) return 0;
+    let multiplier = 22;
+    if (formData.province === 'Ontario') multiplier = 44;
+    if (formData.province === 'Quebec') multiplier = 32;
+    if (formData.province === 'British Columbia') multiplier = 28;
+    return formData.storeCategories.length * multiplier;
+  }, [formData.province, formData.storeCategories]);
+
+  const recommendedPlacements = useMemo(() => {
+    return PLACEMENTS.filter(p => p.recommendedObjectives.includes(formData.objective));
+  }, [formData.objective]);
+
+  useEffect(() => {
+    if (currentStep === 4 && formData.selectedPlacements.length === 0) {
+      setFormData(prev => ({ ...prev, selectedPlacements: recommendedPlacements.map(p => p.id) }));
+    }
+  }, [currentStep, recommendedPlacements, formData.selectedPlacements.length]);
+
+  const isStepValid = (step: number) => {
+    if (step === 1) return formData.name.trim() !== '' && formData.brandName.trim() !== '' && formData.objective !== '';
+    if (step === 2) return formData.province !== '' && formData.city.trim() !== '' && formData.storeCategories.length > 0;
+    if (step === 3) return formData.budget >= 5000 && formData.startDate !== '' && formData.endDate !== '';
+    if (step === 4) return formData.selectedPlacements.length > 0;
+    if (step === 5) return true;
+    return true;
+  };
+
+  const toggleCategory = (cat: string) => {
+    setFormData(prev => ({
+      ...prev,
+      storeCategories: prev.storeCategories.includes(cat)
+        ? prev.storeCategories.filter(c => c !== cat)
+        : [...prev.storeCategories, cat]
+    }));
+  };
+
+  const togglePlacement = (pid: string) => {
+    setFormData(prev => ({
+      ...prev,
+      selectedPlacements: prev.selectedPlacements.includes(pid)
+        ? prev.selectedPlacements.filter(id => id !== pid)
+        : [...prev.selectedPlacements, pid]
+    }));
+  };
+
+  const [backdrop, setBackdrop] = useState<'convenience' | 'cafe' | 'pharmacy'>('convenience');
+  const backdropImages = {
+    convenience: '/images/storefront.png',
+    cafe: '/images/cafe.png',
+    pharmacy: '/images/medical.png'
+  };
+
+  const predictions = useMemo(() => {
+    const averageStoreCost = 150;
+    const storesCovered = Math.min(estimatedStoreCount, Math.round(formData.budget / averageStoreCost));
+    const reach = storesCovered * 5200;
+    const impressions = storesCovered * 13500;
+    let roi = '3.5x';
+    if (formData.objective === 'Sales Campaign') roi = '4.8x';
+    if (formData.objective === 'Product Launch') roi = '4.1x';
+    if (formData.objective === 'Seasonal Promotion') roi = '3.8x';
+    return {
+      stores: storesCovered > 0 ? storesCovered : 12,
+      reach: reach > 0 ? `${(reach / 1000).toFixed(0)}k` : '55k',
+      impressions: impressions > 0 ? `${(impressions / 1000000).toFixed(1)}M` : '1.1M',
+      roi
+    };
+  }, [formData.budget, formData.objective, estimatedStoreCount]);
+
+  const handleLaunchCampaign = async () => {
     setLoading(true);
     try {
-      await addDoc(collection(db, 'campaign_requests'), {
-        brandId: profile?.brandId || user?.uid,
-        brandName: profile?.displayName || 'Unknown Brand',
+      const selectedPlacementsNames = formData.selectedPlacements.map(pid => PLACEMENTS.find(p => p.id === pid)?.name).filter(Boolean);
+      const payload = {
+        brandId: profile?.brandId || user?.uid || 'anonymous_brand',
+        brandName: profile?.displayName || 'Coca-Cola Canada Marketing',
         status: 'pending',
         adFormat: {
-          id: selectedFormat.id,
-          name: selectedFormat.name,
-          imageUrl: selectedFormat.imageUrl,
+          id: formData.selectedPlacements[0] || 'storefront-poster',
+          name: selectedPlacementsNames.join(', ') || 'Storefront Posters',
+          imageUrl: PLACEMENTS.find(p => p.id === formData.selectedPlacements[0])?.imageUrl || '/images/admesh-instore-poster-display.png'
         },
-        adSize: formData.adSize,
-        retailTypes: formData.retailTypes,
-        outletCount: Number(formData.outletCount),
-        timeline: formData.timeline,
-        targetLocations: formData.targetLocations.join(', '),
-        campaignObjective: formData.campaignObjective.trim(),
-        useCustomMaterial: formData.useCustomMaterial,
-        customMaterialDetails: formData.customMaterialDetails.trim(),
-        pickupLocation: formData.pickupLocation.trim(),
+        adSize: 'Standard Placement',
+        retailTypes: formData.storeCategories,
+        outletCount: predictions.stores,
+        timeline: `${Math.ceil((new Date(formData.endDate).getTime() - new Date(formData.startDate).getTime()) / (1000 * 3600 * 24))} Days Campaign`,
+        targetLocations: `${formData.city}, ${formData.province}`,
+        campaignObjective: formData.objective,
+        budget: formData.budget,
+        placements: formData.selectedPlacements,
+        artworkUrl: formData.artworkUrl,
         createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      });
-
+        updatedAt: serverTimestamp()
+      };
+      await addDoc(collection(db, 'campaign_requests'), payload);
       setSubmitted(true);
-      setTimeout(() => router.push('/dashboard/campaigns'), 2200);
-    } catch (error) {
-      console.error('Error submitting request:', error);
-      alert('Failed to submit request. Please try again.');
+      setTimeout(() => { router.push('/dashboard'); }, 1800);
+    } catch (err) {
+      console.error('Error launching campaign:', err);
+      alert('Launch failed. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
+  // ── Success state ──
   if (submitted) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-center">
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center text-white mb-6"
-        >
-          <CheckCircle2 size={38} />
-        </motion.div>
-        <h2 className="text-3xl font-bold mb-3">Thank you. Request submitted.</h2>
-        <p className="text-muted-foreground max-w-xl mx-auto">
-          We are processing your ad request and it has been listed in your campaign queue. You will receive the next update shortly.
-        </p>
+      <div style={{ backgroundColor: '#ffffff', border: '1px solid rgba(17,35,59,0.10)', padding: '80px 52px', maxWidth: '860px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '20px' }}>
+        <div style={{ width: '52px', height: '52px', backgroundColor: 'rgba(255,179,0,0.08)', border: '2px solid rgba(255,179,0,0.2)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="animate-pulse">
+          <CheckCircle2 size={24} className="text-[#FFB300]" />
+        </div>
+        <div>
+          <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#11233B', textTransform: 'uppercase', fontFamily: 'var(--font-mono)', marginBottom: '8px' }}>Campaign Strategist Logged</h2>
+          <p style={{ fontSize: '12px', color: '#52617A', lineHeight: 1.7, maxWidth: '360px', fontFamily: 'var(--font-mono)' }}>
+            Your campaign details have been verified and scheduled. Partner checks, screen allocation, and print checks are starting.
+          </p>
+        </div>
+        <p style={{ fontSize: '10px', color: '#52617A', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.1em' }} className="animate-pulse">Navigating back to campaign manager...</p>
       </div>
     );
   }
 
-  const renderAdFormatModal = () => {
-    if (!selectedFormatForView) return null;
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.95 }}
-          className="bg-[#111114] border border-white/10 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
-        >
-          <div className="relative">
-            <button
-              onClick={closeViewModal}
-              className="absolute top-4 right-4 z-10 w-10 h-10 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center text-white transition-colors"
-            >
-              <X size={20} />
-            </button>
-            <div className="aspect-video bg-[#09090b]">
-              <img
-                src={selectedFormatForView.imageUrl}
-                alt={selectedFormatForView.name}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          </div>
-          <div className="p-8 space-y-6">
-            <div>
-              <h3 className="text-3xl font-bold text-white mb-2">{selectedFormatForView.name}</h3>
-              <p className="text-amber-400 text-sm font-medium">{selectedFormatForView.retailType}</p>
-            </div>
-            <p className="text-slate-300 leading-relaxed">{selectedFormatForView.description}</p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white/5 rounded-xl p-5 border border-white/10">
-                <h4 className="text-amber-400 font-semibold mb-3 flex items-center gap-2">
-                  <Package size={18} />
-                  Material Specifications
-                </h4>
-                <p className="text-slate-300 text-sm">{selectedFormatForView.material}</p>
-              </div>
-              <div className="bg-white/5 rounded-xl p-5 border border-white/10">
-                <h4 className="text-amber-400 font-semibold mb-3 flex items-center gap-2">
-                  <Layers size={18} />
-                  Print Type
-                </h4>
-                <p className="text-slate-300 text-sm">{selectedFormatForView.printType}</p>
-              </div>
-            </div>
-            <div className="bg-white/5 rounded-xl p-5 border border-white/10">
-              <h4 className="text-amber-400 font-semibold mb-3">Available Sizes</h4>
-              <div className="flex flex-wrap gap-2">
-                {selectedFormatForView.sizeOptions.map((size) => (
-                  <span key={size} className="px-3 py-2 bg-white/10 rounded-lg text-slate-300 text-sm">
-                    {size}
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div className="bg-white/5 rounded-xl p-5 border border-white/10">
-              <h4 className="text-amber-400 font-semibold mb-3">Strategic Advantage</h4>
-              <p className="text-slate-300 text-sm">{selectedFormatForView.advantage}</p>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-slate-400">
-              <span className="text-amber-400 font-semibold">Visibility Score:</span>
-              <span>{selectedFormatForView.visibilityScore}</span>
-            </div>
-          </div>
-        </motion.div>
-      </div>
-    );
-  };
-
+  // ── Wizard ──
   return (
-    <div className="max-w-6xl mx-auto db-page pb-12">
-      <div className="flex flex-row items-start justify-between gap-4 w-full">
-        <div className="min-w-0 flex-1">
-          <h1 className="db-heading">New Campaign Request</h1>
-          <p className="text-muted-foreground text-xs sm:text-sm">
-            Place a request quickly: choose format, size, retail types, outlet count, and timeline.
+    <div style={{ backgroundColor: '#ffffff', border: '1px solid rgba(17,35,59,0.10)', padding: '48px 52px 56px 52px', maxWidth: '860px' }}>
+
+      {/* ── Wizard Header ── */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', paddingBottom: '24px', borderBottom: '1px solid rgba(17,35,59,0.08)', marginBottom: '32px' }}>
+        <div>
+          <h1 style={{ fontSize: '22px', fontWeight: 800, color: '#11233B', textTransform: 'uppercase', letterSpacing: '-0.01em', fontFamily: 'var(--font-space)', marginBottom: '6px' }}>New Campaign</h1>
+          <p style={{ fontSize: '11px', color: '#52617A', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+            Step {currentStep} of 6 — {
+              currentStep === 1 ? 'Product Details' :
+              currentStep === 2 ? 'Audience Reach' :
+              currentStep === 3 ? 'Budget & Timeline' :
+              currentStep === 4 ? 'AI Placement Recommendations' :
+              currentStep === 5 ? 'Artwork Mockups' : 'Review & Launch'
+            }
           </p>
         </div>
         <button
           type="button"
           onClick={() => router.back()}
-          className="inline-flex items-center justify-center gap-2.5 h-11 px-5 rounded-xl border border-rose-500/20 bg-rose-500/5 text-rose-400 hover:bg-rose-500/10 hover:border-rose-500/30 hover:text-rose-300 transition-all text-xs font-bold uppercase tracking-wider shrink-0"
-          title="Cancel Campaign Request"
+          className="text-[#52617A] hover:text-[#11233B] font-mono uppercase font-bold transition-colors"
+          style={{ fontSize: '10px', letterSpacing: '0.1em', padding: '8px 14px', border: '1px solid rgba(17,35,59,0.12)', backgroundColor: 'transparent', cursor: 'pointer' }}
         >
-          <X size={14} />
-          <span>Cancel</span>
+          Cancel
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-8 pb-[75px]">
-        <div className="db-card p-6 lg:p-8 space-y-5">
-          <div className="flex items-center justify-between">
-            <span className="db-kicker">Step {currentStep} / {totalSteps}</span>
-            <span className="text-xs text-muted-foreground">
-              {currentStep === 1 && 'Ad Format'}
-              {currentStep === 2 && 'Size & Material'}
-              {currentStep === 3 && 'Coverage'}
-              {currentStep === 4 && 'Timeline'}
-              {currentStep === 5 && 'Review & Submit'}
-            </span>
-          </div>
-          <div className="h-1 w-full bg-white/10 overflow-hidden rounded-full">
-            <div className="h-full bg-amber transition-all duration-300" style={{ width: `${(currentStep / totalSteps) * 100}%` }} />
-          </div>
+      {/* ── AI Prompt Strategist ── */}
+      <div style={{ backgroundColor: '#F1EFE6', border: '1px solid rgba(17,35,59,0.08)', padding: '20px 24px', marginBottom: '32px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+          <Sparkles size={14} className="text-[#FFB300]" />
+          <span style={{ fontSize: '11px', fontWeight: 700, color: '#11233B', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>AI Prompt Strategist</span>
         </div>
-
-        {currentStep === 1 && (
-        <div className="db-card p-8 lg:p-10 space-y-8">
-          <div>
-            <h2 className="text-xl font-bold mb-2 inline-flex items-center gap-2"><LayoutTemplate className="db-accent" size={20} /> 1. Select Ad Format</h2>
-            <p className="text-sm text-muted-foreground">Choose from our available ad formats. Click &quot;View&quot; to see detailed specifications.</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {AD_FORMATS.map((format) => {
-              const active = formData.adFormatId === format.id;
-              return (
-                <div
-                  key={format.id}
-                  className={`rounded-2xl border transition-all overflow-hidden ${
-                    active
-                      ? 'border-amber-400 bg-amber-500/10 ring-2 ring-amber-400/30 shadow-lg shadow-amber-400/10'
-                      : 'border-white/10 bg-white/5 hover:border-amber-300/40 hover:shadow-lg hover:shadow-black/20'
-                  }`}
-                >
-                  <div className="h-52 bg-[#20242b] border-b border-white/10 relative overflow-hidden">
-                    <img 
-                      src={format.imageUrl} 
-                      alt={format.name} 
-                      className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" 
-                    />
-                    {active && (
-                      <div className="absolute top-4 right-4 bg-amber-500 text-black px-4 py-2 rounded-full text-xs font-bold shadow-lg">
-                        Selected
-                      </div>
-                    )}
-                  </div>
-                  <div className="p-6 space-y-4">
-                    <div className="space-y-2">
-                      <p className="text-lg font-semibold text-slate-100 leading-tight">{format.name}</p>
-                      <p className="text-sm text-slate-400 leading-relaxed">{format.retailType}</p>
-                    </div>
-                    <div className="flex gap-3 pt-2">
-                      <button
-                        type="button"
-                        onClick={() => onFormatChange(format.id)}
-                        className={`flex-1 px-5 py-3 rounded-xl text-sm font-semibold transition-all duration-200 ${
-                          active
-                            ? 'bg-amber-500 text-black hover:bg-amber-400 shadow-md shadow-amber-500/20'
-                            : 'bg-white/10 text-slate-300 hover:bg-white/20 hover:text-white'
-                        }`}
-                      >
-                        Select
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => openViewModal(format)}
-                        className="flex-1 px-5 py-3 rounded-xl text-sm font-semibold bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white transition-all duration-200 flex items-center justify-center gap-2 border border-white/10"
-                      >
-                        <Eye size={18} />
-                        View
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+        <form onSubmit={handleAiSubmit} style={{ display: 'flex', gap: '10px' }}>
+          <input
+            type="text"
+            value={aiPrompt}
+            onChange={(e) => setAiPrompt(e.target.value)}
+            placeholder="Launch a back-to-school campaign across Toronto convenience stores with a budget of $25,000."
+            className="font-mono text-[#11233B] focus:outline-none focus:border-[#11233B] focus:bg-white transition-all"
+            style={{ flex: 1, border: '1px solid rgba(17,35,59,0.15)', backgroundColor: '#ffffff', padding: '9px 14px', fontSize: '11px' }}
+          />
+          <button
+            type="submit"
+            disabled={generatingAi || !aiPrompt.trim()}
+            className="db-btn-primary disabled:opacity-50"
+            style={{ fontSize: '11px', padding: '0 20px', whiteSpace: 'nowrap' }}
+          >
+            Generate
+          </button>
+        </form>
+        {generatingAi && (
+          <p style={{ fontSize: '10px', color: '#FFB300', fontFamily: 'var(--font-mono)', marginTop: '10px', fontWeight: 600 }} className="animate-pulse">{aiStatus}</p>
         )}
+      </div>
 
-        {currentStep === 2 && (
-        <>
-        <div className="db-card p-8 lg:p-10 space-y-8">
-          <div>
-            <h2 className="text-xl font-bold mb-2 inline-flex items-center gap-2"><Layers className="db-accent" size={20} /> 2. Select Size</h2>
-            <p className="text-sm text-muted-foreground">
-              Choose size based on selected ad format: <span className="text-slate-200">{selectedFormat.name}</span>. Each option includes a quick shape reference.
-            </p>
-          </div>
+      {/* ── Step Progress Bar ── */}
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '40px' }}>
+        {Array.from({ length: 6 }).map((_, i) => {
+          const stepNum = i + 1;
+          const isCurrent = currentStep === stepNum;
+          const isPassed = currentStep > stepNum;
+          return (
+            <React.Fragment key={i}>
+              <div style={{
+                width: '28px', height: '28px', borderRadius: '50%', flexShrink: 0,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '10px', fontWeight: 700, fontFamily: 'var(--font-mono)',
+                border: isCurrent ? '2px solid #11233B' : isPassed ? '2px solid #FFB300' : '2px solid rgba(17,35,59,0.15)',
+                backgroundColor: isCurrent ? '#11233B' : isPassed ? '#FFB300' : 'transparent',
+                color: isCurrent ? '#F1EFE6' : isPassed ? '#ffffff' : '#52617A',
+                transition: 'all 0.2s ease'
+              }}>
+                {isPassed ? <Check size={10} /> : stepNum}
+              </div>
+              {i < 5 && <div style={{ flex: 1, height: '2px', backgroundColor: isPassed ? '#FFB300' : 'rgba(17,35,59,0.08)', transition: 'background-color 0.2s ease', margin: '0 4px' }} />}
+            </React.Fragment>
+          );
+        })}
+      </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {selectedFormat.sizeOptions.map((size) => (
-              <button
-                key={size}
-                type="button"
-                onClick={() => setFormData((prev) => ({ ...prev, adSize: size }))}
-                className={`rounded-lg border px-4 py-3 text-sm text-left ${
-                  formData.adSize === size
-                    ? 'border-amber-400 bg-amber-500/10 text-slate-100'
-                    : 'border-white/10 bg-white/5 text-slate-300 hover:border-amber-300/40'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-md border border-white/20 bg-white/5 flex items-center justify-center shrink-0">
-                    {getSizeShape(size) === 'vertical' && <span className="w-3 h-5 border border-amber-300/80 rounded-[2px] block" />}
-                    {getSizeShape(size) === 'horizontal' && <span className="w-5 h-3 border border-amber-300/80 rounded-[2px] block" />}
-                    {getSizeShape(size) === 'square' && <span className="w-4 h-4 border border-amber-300/80 rounded-[2px] block" />}
-                  </div>
-                  <span>{size}</span>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
+      {/* ── Step Content ── */}
+      <div style={{ minHeight: '280px' }}>
 
-        <div className="db-card p-8 lg:p-10 space-y-8">
-          <div>
-            <h2 className="text-xl font-bold mb-2 inline-flex items-center gap-2"><Package className="db-accent" size={20} /> 3. Material Options</h2>
-            <p className="text-sm text-muted-foreground">
-              Decide whether AdMesh handles printing + installation, or you provide the printed material and we handle deployment.
-            </p>
-          </div>
-
-          <div className="space-y-4">
-            <div className="rounded-lg border border-white/10 bg-white/5 p-4 text-sm text-slate-300 space-y-3 leading-relaxed">
-              <p><span className="text-slate-100 font-semibold">Option A:</span> AdMesh prints, dispatches, and installs (recommended for faster execution).</p>
-              <p><span className="text-slate-100 font-semibold">Option B:</span> You provide print-ready material; AdMesh manages on-ground installation and verification.</p>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                id="useCustomMaterial"
-                checked={formData.useCustomMaterial}
-                onChange={(e) => setFormData((prev) => ({ ...prev, useCustomMaterial: e.target.checked }))}
-                className="w-5 h-5 rounded border-white/20 bg-white/5 text-amber-500 focus:ring-amber-500 focus:ring-offset-0"
-              />
-              <label htmlFor="useCustomMaterial" className="text-sm font-medium text-slate-200 cursor-pointer">
-                I will provide my own printed material (AdMesh installation only)
-              </label>
-            </div>
-
-            {formData.useCustomMaterial && (
-              <div className="space-y-4 pl-8 border-l-2 border-amber-400/30 mt-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold ml-1">Custom Material Details</label>
-                  <textarea
-                    value={formData.customMaterialDetails}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, customMaterialDetails: e.target.value }))}
-                    className="db-input w-full px-4 py-3 min-h-[100px]"
-                    placeholder="Describe your custom material (e.g., type, dimensions, specifications, quantity)"
-                    required={formData.useCustomMaterial}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold ml-1">Pickup Location</label>
+        {/* Step 1: What are you promoting? */}
+        {currentStep === 1 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
+            <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#11233B', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: 'var(--font-mono)' }}>What are you promoting?</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+              {[
+                { label: 'Campaign Name', key: 'name', placeholder: 'e.g. Summer Refresh 2026' },
+                { label: 'Brand', key: 'brandName', placeholder: 'e.g. Coca-Cola' },
+                { label: 'Product', key: 'productName', placeholder: 'e.g. Coca-Cola Zero Sugar' },
+              ].map(({ label, key, placeholder }) => (
+                <div key={key} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <label style={{ fontSize: '10px', fontWeight: 700, color: '#52617A', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: 'var(--font-mono)' }}>{label}</label>
                   <input
                     type="text"
-                    value={formData.pickupLocation}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, pickupLocation: e.target.value }))}
-                    className="db-input w-full px-4 py-3"
-                    placeholder="Enter the address where we can pick up your material"
-                    required={formData.useCustomMaterial}
+                    value={formData[key as keyof typeof formData] as string}
+                    onChange={(e) => setFormData(prev => ({ ...prev, [key]: e.target.value }))}
+                    placeholder={placeholder}
+                    className="focus:outline-none focus:border-[#11233B] text-[#11233B] font-mono transition-all"
+                    style={{ border: '1px solid rgba(17,35,59,0.15)', padding: '10px 14px', fontSize: '12px', backgroundColor: '#F1EFE6' }}
                   />
                 </div>
-                <div className="rounded-lg border border-amber-400/30 bg-amber-500/5 p-4 text-sm text-slate-300 flex items-start gap-2">
-                  <MapPin size={16} className="mt-0.5 text-amber-400 flex-shrink-0" />
-                  <span>Our team will coordinate with you to schedule the pickup of your custom material at the specified location.</span>
-                </div>
-                <div className="rounded-lg border border-white/10 bg-white/5 p-4 text-sm text-slate-300">
-                  Installation/service fees may still apply based on format type, outlet count, and city-level deployment complexity.
-                </div>
-              </div>
-            )}
-
-            {!formData.useCustomMaterial && (
-              <div className="rounded-lg border border-white/10 bg-white/5 p-4 text-sm text-slate-300">
-                AdMesh will handle print production standards, logistics, and installation as part of your campaign workflow.
-              </div>
-            )}
-          </div>
-        </div>
-        </>
-        )}
-
-        {currentStep === 3 && (
-        <div className="db-card p-8 lg:p-10 space-y-8">
-          <div>
-            <h2 className="text-xl font-bold mb-2 inline-flex items-center gap-2"><Store className="db-accent" size={20} /> 4. Retail Types & Coverage</h2>
-            <p className="text-sm text-muted-foreground">Pick where to run and how many outlets to cover.</p>
-          </div>
-
-          <div className="space-y-5">
-            <div>
-              <label className="text-sm font-semibold mb-3 block">Retail Types (select one or more)</label>
-              <div className="grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: '16px 20px', marginTop: '24px', marginBottom: '32px' }}>
-                {RETAIL_TYPES.map((type) => (
+              ))}
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <label style={{ fontSize: '10px', fontWeight: 700, color: '#52617A', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: 'var(--font-mono)' }}>Campaign Objective</label>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+                {OBJECTIVES.map((obj) => (
                   <button
-                    key={type}
+                    key={obj}
                     type="button"
-                    onClick={() => toggleRetailType(type)}
-                    className={`rounded-xl border p-3 md:p-4 flex flex-col items-center gap-2 md:gap-3 transition-all ${
-                      formData.retailTypes.includes(type)
-                        ? 'bg-amber-500 border-amber-500 text-[#1b140c]'
-                        : 'bg-white/5 border-white/10 text-slate-300 hover:border-amber-300/40'
-                    }`}
+                    onClick={() => setFormData(prev => ({ ...prev, objective: obj }))}
+                    style={{
+                      border: formData.objective === obj ? '2px solid #FFB300' : '1px solid rgba(17,35,59,0.12)',
+                      backgroundColor: formData.objective === obj ? 'rgba(255,179,0,0.06)' : '#F1EFE6',
+                      padding: '14px 16px', textAlign: 'left', cursor: 'pointer', transition: 'all 0.15s ease'
+                    }}
                   >
-                    {(() => {
-                      const Icon = RETAIL_TYPE_ICON_MAP[type] ?? Store;
-                      return <Icon className={`h-5 w-5 md:h-6 md:w-6 mt-1.5 md:mt-2.5 ${formData.retailTypes.includes(type) ? 'text-[#1b140c]' : 'text-amber-300'}`} />;
-                    })()}
-                    <span className="text-xs md:text-sm font-medium text-center">{type}</span>
+                    <p style={{ fontSize: '11px', fontWeight: 700, color: '#11233B', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>{obj}</p>
+                    <p style={{ fontSize: '10px', color: '#52617A', lineHeight: 1.5 }}>
+                      {obj === 'Brand Awareness' && 'Broad visibility across premium locations.'}
+                      {obj === 'Product Launch' && 'Spotlight new SKUs on Canadian shelves.'}
+                      {obj === 'Seasonal Promotion' && 'Aligned to holidays or calendar runs.'}
+                      {obj === 'Sales Campaign' && 'Pushes checkout conversions and trials.'}
+                      {obj === 'Local Marketing' && 'Geo-targeted neighbourhood impact.'}
+                    </p>
                   </button>
                 ))}
               </div>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between ml-1">
-                  <label className="text-sm font-semibold">Number of Outlets to Cover</label>
-                  <span className="text-lg font-bold text-amber-400 tabular-nums">{formData.outletCount}</span>
-                </div>
-                <input
-                  type="range"
-                  min={5}
-                  max={500}
-                  step={5}
-                  value={formData.outletCount}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, outletCount: e.target.value }))}
-                  className="db-slider w-full"
-                />
-                <div className="flex justify-between text-[10px] text-slate-500 font-medium px-1">
-                  <span>5</span>
-                  <span>125</span>
-                  <span>250</span>
-                  <span>375</span>
-                  <span>500+</span>
-                </div>
-              </div>
-              <div className="space-y-3">
-                <label className="text-sm font-semibold ml-1">Target Cities (select one or more)</label>
-                <div className="flex flex-wrap gap-2 mt-1">
-                  {CITIES.map((city) => {
-                    const selected = formData.targetLocations.includes(city);
-                    return (
-                      <button
-                        key={city}
-                        type="button"
-                        onClick={() => toggleCity(city)}
-                        className={`px-5 py-3 rounded-xl text-sm font-semibold border transition-all ${
-                          selected
-                            ? 'bg-amber-500 border-amber-500 text-[#1b140c]'
-                            : 'bg-white/5 border-white/10 text-slate-300 hover:border-amber-400/40 hover:text-slate-100'
-                        }`}
-                      >
-                        {city}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
           </div>
-        </div>
         )}
 
-        {currentStep === 4 && (
-        <div className="db-card p-8 lg:p-10 space-y-8">
-          <div>
-            <h2 className="text-xl font-bold mb-2 inline-flex items-center gap-2"><Clock3 className="db-accent" size={20} /> 5. Timeline & Notes</h2>
-            <p className="text-sm text-muted-foreground">Select your desired execution timeline and outline your campaign objectives.</p>
-          </div>
-
-          <div className="space-y-6">
-            <div>
-              <label className="text-sm font-semibold mb-3 block">Deployment Timeline (select one)</label>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                {TIMELINE_CARDS.map((card) => {
-                  const Icon = card.icon;
-                  const isSelected = formData.timeline === card.duration;
+        {/* Step 2: Who do you want to reach? */}
+        {currentStep === 2 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
+            <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#11233B', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: 'var(--font-mono)' }}>Who do you want to reach?</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '10px', fontWeight: 700, color: '#52617A', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: 'var(--font-mono)' }}>Province</label>
+                <select
+                  value={formData.province}
+                  onChange={(e) => setFormData(prev => ({ ...prev, province: e.target.value }))}
+                  className="focus:outline-none focus:border-[#11233B] text-[#11233B] font-mono transition-all"
+                  style={{ border: '1px solid rgba(17,35,59,0.15)', padding: '10px 14px', fontSize: '12px', backgroundColor: '#F1EFE6' }}
+                >
+                  {PROVINCES.map((prov) => (<option key={prov} value={prov}>{prov}</option>))}
+                </select>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '10px', fontWeight: 700, color: '#52617A', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: 'var(--font-mono)' }}>Target Cities</label>
+                <input
+                  type="text"
+                  value={formData.city}
+                  onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
+                  placeholder="e.g. Toronto, Mississauga"
+                  className="focus:outline-none focus:border-[#11233B] text-[#11233B] font-mono transition-all"
+                  style={{ border: '1px solid rgba(17,35,59,0.15)', padding: '10px 14px', fontSize: '12px', backgroundColor: '#F1EFE6' }}
+                />
+              </div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <label style={{ fontSize: '10px', fontWeight: 700, color: '#52617A', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: 'var(--font-mono)' }}>Retail Categories</label>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                {STORE_CATEGORIES.map((cat) => {
+                  const isSelected = formData.storeCategories.includes(cat);
                   return (
                     <button
-                      key={card.id}
+                      key={cat}
                       type="button"
-                      onClick={() => setFormData((prev) => ({ ...prev, timeline: card.duration }))}
-                      className={`relative text-left rounded-xl border p-5 flex flex-col justify-between h-[155px] transition-all ${
-                        isSelected
-                          ? 'bg-amber-500/10 border-amber-500 text-slate-100 shadow-[0_0_15px_rgba(201,115,32,0.15)]'
-                          : 'bg-white/5 border-white/10 text-slate-300 hover:border-amber-500/40 hover:bg-white/8'
-                      }`}
-                    >
-                      {card.badge && (
-                        <span className={`absolute top-3 right-3 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
-                          isSelected ? 'bg-amber-500 text-[#1b140c]' : 'bg-white/10 text-slate-400'
-                        }`}>
-                          {card.badge}
-                        </span>
-                      )}
-                      <div>
-                        <Icon size={22} className={isSelected ? 'text-amber-400' : 'text-slate-400'} />
-                      </div>
-                      <div className="mt-4">
-                        <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">{card.label}</p>
-                        <p className="text-sm font-bold text-slate-100 mt-0.5">{card.duration}</p>
-                        <p className="text-[10px] text-slate-500 mt-1 leading-normal line-clamp-2">{card.description}</p>
-                      </div>
-                    </button>
+                      onClick={() => toggleCategory(cat)}
+                      style={{
+                        padding: '8px 16px', fontSize: '11px', fontWeight: 600, fontFamily: 'var(--font-mono)',
+                        border: isSelected ? '2px solid #FFB300' : '1px solid rgba(17,35,59,0.15)',
+                        backgroundColor: isSelected ? 'rgba(255,179,0,0.08)' : '#F1EFE6',
+                        color: isSelected ? '#FFB300' : '#52617A', cursor: 'pointer', transition: 'all 0.15s ease'
+                      }}
+                    >{cat}</button>
                   );
                 })}
               </div>
+              {formData.storeCategories.length > 0 && (
+                <div style={{ backgroundColor: '#F1EFE6', border: '1px solid rgba(17,35,59,0.08)', padding: '14px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '11px', color: '#52617A', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Estimated active coverage nodes:</span>
+                  <span style={{ fontSize: '15px', fontWeight: 800, color: '#11233B', fontFamily: 'var(--font-mono)' }}>{estimatedStoreCount} outlets</span>
+                </div>
+              )}
             </div>
+          </div>
+        )}
 
-            <div className="space-y-2">
-              <label className="text-sm font-semibold ml-1">Campaign Objective (optional)</label>
+        {/* Step 3: Budget & Timeline */}
+        {currentStep === 3 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
+            <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#11233B', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: 'var(--font-mono)' }}>Budget & Timeline</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', backgroundColor: '#F1EFE6', border: '1px solid rgba(17,35,59,0.08)', padding: '24px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '11px', color: '#52617A', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 700 }}>Allocated Budget</span>
+                <span style={{ fontSize: '24px', fontWeight: 800, color: '#FFB300', fontFamily: 'var(--font-mono)' }}>${formData.budget.toLocaleString()} CAD</span>
+              </div>
               <input
-                type="text"
-                value={formData.campaignObjective}
-                onChange={(e) => setFormData((prev) => ({ ...prev, campaignObjective: e.target.value }))}
-                className="db-input w-full px-4 py-3"
-                placeholder="e.g. Improve in-store visibility for new SKU"
+                type="range" min={5000} max={100000} step={2500}
+                value={formData.budget}
+                onChange={(e) => setFormData(prev => ({ ...prev, budget: Number(e.target.value) }))}
+                className="w-full cursor-pointer accent-[#FFB300]"
+                style={{ height: '4px' }}
               />
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', fontWeight: 700, color: '#52617A', fontFamily: 'var(--font-mono)' }}>
+                <span>$5,000 MIN</span><span>$100,000 MAX</span>
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              {[{ label: 'Start Date', key: 'startDate' }, { label: 'End Date', key: 'endDate' }].map(({ label, key }) => (
+                <div key={key} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <label style={{ fontSize: '10px', fontWeight: 700, color: '#52617A', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: 'var(--font-mono)' }}>{label}</label>
+                  <input
+                    type="date"
+                    value={formData[key as keyof typeof formData] as string}
+                    onChange={(e) => setFormData(prev => ({ ...prev, [key]: e.target.value }))}
+                    className="focus:outline-none focus:border-[#11233B] text-[#11233B] font-mono transition-all"
+                    style={{ border: '1px solid rgba(17,35,59,0.15)', padding: '10px 14px', fontSize: '12px', backgroundColor: '#F1EFE6' }}
+                  />
+                </div>
+              ))}
             </div>
           </div>
-
-          <div className="rounded-lg border border-white/10 bg-white/5 p-4 text-sm text-slate-300 inline-flex items-start gap-2">
-            <MapPin size={16} className="mt-0.5 text-amber-300" />
-            We will use your selections to quickly shortlist matching stores, estimate rollout feasibility, and queue your request for execution.
-          </div>
-        </div>
         )}
 
+        {/* Step 4: AI Recommendations */}
+        {currentStep === 4 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            <div>
+              <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#11233B', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: 'var(--font-mono)', marginBottom: '6px' }}>AI Placement Recommendations</h3>
+              <p style={{ fontSize: '11px', color: '#52617A', fontFamily: 'var(--font-mono)' }}>Matching objective: <strong>{formData.objective}</strong></p>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              {PLACEMENTS.map((placement) => {
+                const isSelected = formData.selectedPlacements.includes(placement.id);
+                const isAIRecommended = placement.recommendedObjectives.includes(formData.objective);
+                return (
+                  <div key={placement.id} style={{
+                    border: isSelected ? '2px solid #FFB300' : '1px solid rgba(17,35,59,0.12)',
+                    backgroundColor: isSelected ? 'rgba(255,179,0,0.04)' : '#F1EFE6',
+                    padding: '18px', position: 'relative', transition: 'all 0.15s ease'
+                  }}>
+                    {isAIRecommended && (
+                      <span style={{ position: 'absolute', top: '10px', right: '10px', fontSize: '8px', fontWeight: 700, color: '#FFB300', backgroundColor: 'rgba(255,179,0,0.12)', padding: '3px 8px', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.08em', border: '1px solid rgba(255,179,0,0.2)' }}>
+                        Recommended
+                      </span>
+                    )}
+                    <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
+                      <div style={{ width: '56px', height: '56px', flexShrink: 0, overflow: 'hidden', border: '1px solid rgba(17,35,59,0.1)' }}>
+                        <img src={placement.imageUrl} alt={placement.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ fontSize: '12px', fontWeight: 700, color: '#11233B', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', marginBottom: '4px' }}>{placement.name}</p>
+                        <p style={{ fontSize: '10px', color: '#52617A', lineHeight: 1.5, marginBottom: '10px' }}>{placement.useCase}</p>
+                        <div style={{ display: 'flex', gap: '14px', marginBottom: '12px' }}>
+                          <span style={{ fontSize: '9px', color: '#52617A', fontFamily: 'var(--font-mono)' }}>Visibility: <strong style={{ color: '#11233B' }}>{placement.visibility}</strong></span>
+                          <span style={{ fontSize: '9px', color: '#52617A', fontFamily: 'var(--font-mono)' }}>${placement.costPerStore}/store</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => togglePlacement(placement.id)}
+                          style={{
+                            padding: '6px 16px', fontSize: '10px', fontWeight: 700, fontFamily: 'var(--font-mono)', textTransform: 'uppercase', letterSpacing: '0.06em',
+                            border: isSelected ? '1px solid #FFB300' : '1px solid rgba(17,35,59,0.15)',
+                            backgroundColor: isSelected ? '#FFB300' : 'transparent',
+                            color: isSelected ? '#ffffff' : '#11233B', cursor: 'pointer', transition: 'all 0.15s ease',
+                            display: 'inline-flex', alignItems: 'center', gap: '6px'
+                          }}
+                        >
+                          {isSelected ? <><Check size={9} /> Selected</> : 'Select'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Step 5: Artwork */}
         {currentStep === 5 && (
-          <div className="db-card p-8 lg:p-10 space-y-6">
-            <h2 className="text-xl font-bold inline-flex items-center gap-2"><Send className="db-accent" size={20} /> 5. Review & Submit</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-              <div className="rounded-lg border border-white/10 bg-white/5 p-4"><span className="text-muted-foreground">Format:</span> <span className="text-slate-100">{selectedFormat.name}</span></div>
-              <div className="rounded-lg border border-white/10 bg-white/5 p-4"><span className="text-muted-foreground">Size:</span> <span className="text-slate-100">{formData.adSize}</span></div>
-              <div className="rounded-lg border border-white/10 bg-white/5 p-4"><span className="text-muted-foreground">Retail:</span> <span className="text-slate-100">{formData.retailTypes.join(', ')}</span></div>
-              <div className="rounded-lg border border-white/10 bg-white/5 p-4"><span className="text-muted-foreground">Outlets:</span> <span className="text-slate-100">{formData.outletCount}</span></div>
-              <div className="rounded-lg border border-white/10 bg-white/5 p-4"><span className="text-muted-foreground">Timeline:</span> <span className="text-slate-100">{formData.timeline}</span></div>
-              <div className="rounded-lg border border-white/10 bg-white/5 p-4"><span className="text-muted-foreground">Location:</span> <span className="text-slate-100">{formData.targetLocations.join(', ') || 'Not specified'}</span></div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#11233B', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: 'var(--font-mono)' }}>Upload Artwork & Mockups</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: '5fr 7fr', gap: '24px', alignItems: 'start' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ border: '2px dashed rgba(17,35,59,0.15)', padding: '32px 20px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ width: '36px', height: '36px', backgroundColor: '#E7E5DB', border: '1px solid rgba(17,35,59,0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Upload size={16} className="text-[#52617A]" />
+                  </div>
+                  <div>
+                    <p style={{ fontSize: '12px', fontWeight: 700, color: '#11233B', marginBottom: '2px', fontFamily: 'var(--font-mono)', textTransform: 'uppercase' }}>Creative Artwork</p>
+                    <p style={{ fontSize: '10px', color: '#52617A' }}>Drag files here or use sample below</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setFormData(prev => ({ ...prev, artworkUrl: '/images/admesh-network.png', artworkName: 'strategist_creative_brief.png' }))}
+                    style={{ border: '1px solid rgba(17,35,59,0.15)', backgroundColor: '#E7E5DB', padding: '8px 20px', fontSize: '10px', fontWeight: 700, fontFamily: 'var(--font-mono)', textTransform: 'uppercase', color: '#11233B', cursor: 'pointer', width: '100%' }}
+                  >
+                    Use Sample Artwork
+                  </button>
+                  {formData.artworkName && (
+                    <p style={{ fontSize: '10px', color: '#FFB300', fontWeight: 600, fontFamily: 'var(--font-mono)' }}>{formData.artworkName}</p>
+                  )}
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <span style={{ fontSize: '10px', fontWeight: 700, color: '#52617A', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: 'var(--font-mono)' }}>Backdrop Template</span>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+                    {[{ id: 'convenience', label: 'Conv.' }, { id: 'cafe', label: 'Cafe' }, { id: 'pharmacy', label: 'Pharma' }].map((btn) => (
+                      <button
+                        key={btn.id}
+                        type="button"
+                        onClick={() => setBackdrop(btn.id as any)}
+                        style={{
+                          padding: '8px 4px', fontSize: '10px', fontWeight: 700, fontFamily: 'var(--font-mono)', textTransform: 'uppercase',
+                          border: backdrop === btn.id ? '2px solid #FFB300' : '1px solid rgba(17,35,59,0.15)',
+                          backgroundColor: backdrop === btn.id ? 'rgba(255,179,0,0.08)' : '#F1EFE6',
+                          color: backdrop === btn.id ? '#FFB300' : '#52617A', cursor: 'pointer'
+                        }}
+                      >{btn.label}</button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <span style={{ fontSize: '10px', fontWeight: 700, color: '#52617A', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: 'var(--font-mono)' }}>Canadian Storefront Preview</span>
+                <div style={{ border: '1px solid rgba(17,35,59,0.12)', overflow: 'hidden', backgroundColor: '#E7E5DB', position: 'relative', aspectRatio: '16/9' }}>
+                  <img src={backdropImages[backdrop]} alt="Canadian storefront" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  {formData.artworkUrl && (
+                    <div className="absolute bg-white shadow-md border border-slate-400/20 overflow-hidden" style={
+                      backdrop === 'convenience' ? { top: '28%', left: '42%', width: '18%', height: '38%', transform: 'perspective(500px) rotateY(-4deg)' }
+                      : backdrop === 'cafe' ? { top: '32%', left: '26%', width: '16%', height: '33%', transform: 'perspective(400px) rotateY(2deg)' }
+                      : { top: '20%', left: '46%', width: '20%', height: '38%' }
+                    }>
+                      <img src={formData.artworkUrl} alt="Artwork mock" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    </div>
+                  )}
+                  {!formData.artworkUrl && (
+                    <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(10,26,44,0.08)', backdropFilter: 'blur(1px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ fontSize: '10px', fontWeight: 600, color: '#11233B', backgroundColor: 'rgba(241,239,230,0.92)', padding: '6px 14px' }}>Upload artwork to overlay creative</span>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         )}
 
-        <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-white/10 bg-[#0c0c0e]/92 backdrop-blur-xl">
-          <div className="container-full py-4 flex items-center justify-between gap-4">
-            <div className="text-xs text-white/45 mono uppercase tracking-[0.18em]">
-              Step {currentStep} / {totalSteps}
+        {/* Step 6: Review & Launch */}
+        {currentStep === 6 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
+            <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#11233B', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: 'var(--font-mono)', paddingBottom: '16px', borderBottom: '1px solid rgba(17,35,59,0.08)' }}>Review & Launch</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0', backgroundColor: '#F1EFE6', border: '1px solid rgba(17,35,59,0.08)' }}>
+              {[
+                { label: 'Stores Covered', value: `${predictions.stores} outlets` },
+                { label: 'Est. Reach', value: `${predictions.reach} customers` },
+                { label: 'Est. Impressions', value: predictions.impressions },
+                { label: 'Projected ROI', value: predictions.roi, highlight: true },
+              ].map(({ label, value, highlight }, idx) => (
+                <div key={label} style={{ padding: '20px 24px', borderRight: idx < 3 ? '1px solid rgba(17,35,59,0.08)' : 'none' }}>
+                  <span style={{ fontSize: '9px', fontWeight: 700, color: '#52617A', textTransform: 'uppercase', letterSpacing: '0.1em', fontFamily: 'var(--font-mono)', display: 'block', marginBottom: '8px' }}>{label}</span>
+                  <span style={{ fontSize: '18px', fontWeight: 800, color: highlight ? '#FFB300' : '#11233B', fontFamily: 'var(--font-mono)', lineHeight: 1 }}>{value}</span>
+                </div>
+              ))}
             </div>
-            <div className="flex items-center gap-3">
-              {currentStep > 1 && (
-                <button type="button" onClick={() => setCurrentStep((s) => Math.max(1, s - 1))} className="db-btn-ghost px-8">
-                  Back
-                </button>
-              )}
-              {currentStep < totalSteps ? (
-                <button
-                  type="button"
-                  disabled={!isStepValid(currentStep)}
-                  onClick={() => setCurrentStep((s) => Math.min(totalSteps, s + 1))}
-                  className="db-btn-primary px-10 disabled:opacity-60"
-                >
-                  Next
-                </button>
-              ) : (
-                <button type="submit" disabled={loading || !isValid} className="db-btn-primary px-10 disabled:opacity-60">
-                  {loading ? 'Submitting...' : 'Submit Ad Request'}
-                </button>
-              )}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              {[
+                { label: 'Campaign Name', value: formData.name },
+                { label: 'Objective', value: formData.objective },
+                { label: 'Target Region', value: `${formData.city}, ${formData.province}` },
+                { label: 'Allocated Budget', value: `$${formData.budget.toLocaleString()} CAD` },
+                { label: 'Schedule', value: `${formData.startDate} → ${formData.endDate}` },
+                { label: 'Placements', value: formData.selectedPlacements.map(pid => PLACEMENTS.find(p => p.id === pid)?.name).join(', ') || 'None' },
+              ].map(({ label, value }) => (
+                <div key={label} style={{ border: '1px solid rgba(17,35,59,0.08)', padding: '14px 18px', backgroundColor: '#F1EFE6' }}>
+                  <span style={{ fontSize: '9px', fontWeight: 700, color: '#52617A', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: 'var(--font-mono)', display: 'block', marginBottom: '4px' }}>{label}</span>
+                  <span style={{ fontSize: '12px', fontWeight: 700, color: '#11233B', fontFamily: 'var(--font-mono)' }}>{value}</span>
+                </div>
+              ))}
             </div>
           </div>
-        </div>
-      </form>
+        )}
 
-      {viewModalOpen && renderAdFormatModal()}
+      </div>
+
+      {/* ── Navigation Footer ── */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '32px', marginTop: '40px', borderTop: '1px solid rgba(17,35,59,0.08)' }}>
+        <div>
+          {currentStep > 1 && (
+            <button
+              type="button"
+              onClick={() => setCurrentStep(prev => Math.max(1, prev - 1))}
+              className="db-btn-ghost"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '11px' }}
+            >
+              <ArrowLeft size={14} />
+              <span>Back</span>
+            </button>
+          )}
+        </div>
+        <div>
+          {currentStep < 6 ? (
+            <button
+              type="button"
+              disabled={!isStepValid(currentStep)}
+              onClick={() => setCurrentStep(prev => Math.min(6, prev + 1))}
+              className="db-btn-primary disabled:opacity-50"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '11px', padding: '0 28px' }}
+            >
+              <span>Continue</span>
+              <ArrowRight size={14} />
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleLaunchCampaign}
+              disabled={loading || formData.selectedPlacements.length === 0 || !formData.name}
+              className="db-btn-primary disabled:opacity-50"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '11px', padding: '0 36px', height: '44px' }}
+            >
+              <span>{loading ? 'Launching Campaign...' : 'Launch Campaign'}</span>
+              <Send size={14} />
+            </button>
+          )}
+        </div>
+      </div>
+
     </div>
   );
-};
-
-export default CreateCampaignRequest;
+}
