@@ -64,7 +64,7 @@ body::after {
   pointer-events: none;
   z-index: 9999;
   opacity: 0.025; /* Subtle noise */
-  background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+  background-image: url("/noise.svg");
   filter: contrast(120%) brightness(100%);
 }
 

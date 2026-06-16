@@ -39,22 +39,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const pathname = usePathname();
 
   useEffect(() => {
+    if (!auth || !auth.app) {
+      console.warn("Firebase Auth is not initialized. Please configure NEXT_PUBLIC_FIREBASE_API_KEY.");
+      setLoading(false);
+      if (pathname.startsWith('/dashboard')) {
+        router.push('/login');
+      }
+      return;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
       
       if (firebaseUser) {
-        // Fetch user profile for role-based access
-        const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-        if (userDoc.exists()) {
-          const userData = userDoc.data() as UserProfile;
-          setProfile(userData);
+        if (db && db.app) {
+          // Fetch user profile for role-based access
+          try {
+            const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+            if (userDoc.exists()) {
+              const userData = userDoc.data() as UserProfile;
+              setProfile(userData);
 
-          // If on dashboard and not a brand, redirect or handle accordingly
-          if (pathname.startsWith('/dashboard') && userData.role !== 'brand_account') {
-            router.push('/');
+              // If on dashboard and not a brand, redirect or handle accordingly
+              if (pathname.startsWith('/dashboard') && userData.role !== 'brand_account') {
+                router.push('/');
+              }
+            } else {
+              // If profile doesn't exist, might be a new user or handled during signup
+              setProfile(null);
+            }
+          } catch (error) {
+            console.error('Error fetching user profile:', error);
+            setProfile(null);
           }
         } else {
-          // If profile doesn't exist, might be a new user or handled during signup
           setProfile(null);
         }
       } else {
@@ -70,6 +88,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [pathname, router]);
 
   const loginWithGoogle = async () => {
+    if (!auth || !auth.app) {
+      console.error("Firebase Auth is not initialized.");
+      return;
+    }
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
@@ -79,6 +101,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = async () => {
+    if (!auth || !auth.app) {
+      console.error("Firebase Auth is not initialized.");
+      return;
+    }
     try {
       await signOut(auth);
       router.push('/');
@@ -88,10 +114,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const refreshProfile = async () => {
+    if (!auth || !auth.app || !db || !db.app) return;
     if (auth.currentUser) {
-      const userDoc = await getDoc(doc(db, 'users', auth.currentUser.uid));
-      if (userDoc.exists()) {
-        setProfile(userDoc.data() as UserProfile);
+      try {
+        const userDoc = await getDoc(doc(db, 'users', auth.currentUser.uid));
+        if (userDoc.exists()) {
+          setProfile(userDoc.data() as UserProfile);
+        }
+      } catch (error) {
+        console.error('Error refreshing profile:', error);
       }
     }
   };
