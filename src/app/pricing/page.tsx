@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Navbar from '@/components/marketing/Navbar';
 import Footer from '@/components/marketing/Footer';
 import { motion } from 'framer-motion';
-import { Shield, Smartphone, Check, ArrowRight, Zap, Activity, Target } from 'lucide-react';
+import { Shield, Smartphone, Check, ArrowRight } from 'lucide-react';
 
 const fadeUp = {
   initial: { opacity: 0, y: 32 },
@@ -33,198 +33,225 @@ export default function PricingPage() {
   const cpm = ((total / (nodes * days * 400)) * 1000).toFixed(2);
 
   return (
-    <div className="min-h-screen bg-obsidian text-dirty-white">
+    <div className="relative bg-[#F1EFE6] text-[#11233B] min-h-screen selection:bg-[#FFB300] selection:text-[#0A1A2C] font-sans antialiased overflow-x-hidden">
+      
+      {/* Persistent Left Margin Rail (Desktop only) */}
+      <div className="hidden lg:flex fixed left-0 top-0 bottom-0 w-[5vw] border-r border-[#11233B]/10 flex-col items-center justify-between py-24 z-40 select-none pointer-events-none font-mono text-[9px] uppercase tracking-[0.25em] text-[#52617A]">
+        <div style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
+          ADMESH — PRICING MANIFEST — 2026
+        </div>
+        <div style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }} className="text-[#FFB300] font-bold">
+          [ CA.PRICING // PROGRAMMATIC ]
+        </div>
+      </div>
+
       <Navbar />
 
-      {/* Hero */}
-      <section className="relative pt-40 pb-24 bg-obsidian overflow-hidden">
-        <div className="absolute inset-0 glowing-grid opacity-[0.03] pointer-events-none" />
-        <div className="container-full relative z-10 text-center">
-          <motion.div {...fadeUp}>
-            <div className="inline-flex items-center gap-3 mb-8 px-5 py-2.5 border border-amber/20 rounded-full">
-              <div className="w-1.5 h-1.5 rounded-full bg-amber animate-pulse" />
-              <span className="text-[10px] mono text-amber/60 uppercase tracking-[0.4em]">Transparent · Performance-Based · Verified</span>
-            </div>
-            <h1 className="text-6xl lg:text-[clamp(56px,8vw,110px)] font-bold tracking-tighter leading-[0.9] text-dirty-white mb-10 uppercase">
-              Simple.<br /><span className="italic font-serif text-amber">Honest Pricing.</span>
-            </h1>
-            <p className="text-xl text-slate-500 max-w-xl mx-auto font-light leading-[1.9]">
-              Pay only for verified, active placements. No hidden fees. No long-term lock-in. Full transparency on every marketing dollar spent.
-            </p>
-          </motion.div>
-        </div>
-      </section>
+      <main className="w-full lg:pl-[5vw]">
+        {/* Hero */}
+        <section className="relative pt-40 pb-16 bg-[#F1EFE6]">
+          <div className="container-full relative z-10">
+            <motion.div {...fadeUp} className="max-w-3xl">
+              <span className="os-label mb-4 block text-[#FFB300]">[ NETWORK COST ]</span>
+              <h1 className="font-sans text-[#11233B] text-4xl lg:text-6xl font-black uppercase leading-none tracking-tight mb-6">
+                Simple.<br /><span className="text-[#FFB300]">Honest pricing.</span>
+              </h1>
+              <p className="text-base text-[#52617A] font-light leading-relaxed max-w-xl">
+                Pay only for verified, active placements. No hidden fees. No long-term lock-in. Full transparency on every marketing dollar spent.
+              </p>
+            </motion.div>
+          </div>
+        </section>
 
-      {/* Pricing Cards */}
-      <section className="relative py-24 bg-slate-50 border-t border-slate-200/80">
-        <div className="container-full">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {[
-              {
-                tier: 'Self-Verified',
-                price: '1.50',
-                unit: 'per node / per day',
-                desc: 'Ideal for brands running their own campaign monitoring with access to our digital proof dashboard.',
-                features: ['Dashboard Access', 'GPS-Tagged Proofs', 'Photo Verification Feed', '24/7 Support', 'Standard Analytics Reports'],
-                accent: 'border-slate-200 bg-white',
-                icon: Smartphone,
-                cta: 'Start Self-Verified',
-                badge: null,
-              },
-              {
-                tier: 'Agent-Verified',
-                price: '2.50',
-                unit: 'per node / per day',
-                desc: 'Our flagship tier. Physical audits by ground agents, blockchain-sealed proofs, and a dedicated campaign manager.',
-                features: ['Everything in Self-Verified', 'Monthly Physical Audits', 'Blockchain-Sealed Proofs', 'Dedicated Campaign Manager', 'Priority Node Selection', 'ROI Projection Reports'],
-                accent: 'border-amber bg-amber/[0.02]',
-                icon: Shield,
-                cta: 'Start Agent-Verified',
-                badge: 'Most Recommended',
-              },
-            ].map((plan, i) => (
-              <motion.div key={i} initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-                transition={{ delay: i * 0.12, duration: 0.6 }}
-                className={`relative p-10 lg:p-14 rounded-2xl border ${plan.accent} group hover:-translate-y-1 transition-all duration-400 shadow-sm`}>
-                {plan.badge && (
-                  <div className="absolute top-6 right-6 bg-amber text-obsidian text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-tight">{plan.badge}</div>
-                )}
-                <plan.icon size={36} className={`mb-8 ${plan.badge ? 'text-amber' : 'text-slate-300'}`} />
-                <h3 className="text-2xl font-bold text-dirty-white mb-2 tracking-tight">{plan.tier}</h3>
-                <p className="text-sm text-slate-500 font-light mb-8 leading-relaxed">{plan.desc}</p>
-                <div className="flex items-baseline gap-2 mb-10 pb-10 border-b border-slate-200">
-                  <span className="text-5xl font-bold text-amber mono">${plan.price}</span>
-                  <span className="text-sm text-slate-400 font-light">{plan.unit}</span>
+        {/* Pricing Cards */}
+        <section className="enterprise-section w-full bg-[#E7E5DB] border-t border-[#11233B]/10">
+          <div className="container-full">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+              {[
+                {
+                  tier: 'Self-Verified',
+                  price: '1.50',
+                  unit: 'per node / per day',
+                  desc: 'Ideal for brands running their own campaign monitoring with access to our digital proof dashboard.',
+                  features: ['Dashboard Access', 'GPS-Tagged Proofs', 'Photo Verification Feed', '24/7 Support', 'Standard Analytics Reports'],
+                  accent: 'border-[#11233B]/10 bg-[#F1EFE6]',
+                  cta: 'Start Self-Verified',
+                  badge: null,
+                },
+                {
+                  tier: 'Agent-Verified',
+                  price: '2.50',
+                  unit: 'per node / per day',
+                  desc: 'Our flagship tier. Physical audits by ground agents, blockchain-sealed proofs, and a dedicated campaign manager.',
+                  features: ['Everything in Self-Verified', 'Monthly Physical Audits', 'Blockchain-Sealed Proofs', 'Dedicated Campaign Manager', 'Priority Node Selection', 'ROI Projection Reports'],
+                  accent: 'border-[#11233B]/10 bg-[#F1EFE6]',
+                  cta: 'Start Agent-Verified',
+                  badge: 'Most Recommended',
+                },
+              ].map((plan, i) => (
+                <motion.div key={i} initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+                  transition={{ delay: i * 0.12, duration: 0.6 }}
+                  className={`border ${plan.accent} flex flex-col justify-between`}
+                  style={{ padding: 'var(--space-sm) var(--space-sm) var(--space-sm) var(--space-sm)', borderRadius: '0px' }}>
+                  
+                  <div>
+                    <div className="flex items-start justify-between gap-3" style={{ marginBottom: 'var(--space-xs)' }}>
+                      <h3 className="font-sans font-black text-[#11233B] text-lg uppercase tracking-tight leading-tight">{plan.tier}</h3>
+                      {plan.badge && (
+                        <span className="font-mono text-[8px] uppercase tracking-widest text-[#0A1A2C] bg-[#FFB300] px-2 py-0.5 font-bold">
+                          {plan.badge}
+                        </span>
+                      )}
+                    </div>
+                    
+                    <p className="text-xs text-[#52617A] font-light leading-relaxed mb-4 line-clamp-2 h-9" style={{ marginBottom: 'var(--space-sm)' }}>
+                      {plan.desc}
+                    </p>
+
+                    <div className="flex items-baseline gap-2 border-b border-[#11233B]/10" style={{ paddingBottom: 'var(--space-sm)', marginBottom: 'var(--space-sm)' }}>
+                      <span className="text-4xl font-bold text-[#FFB300] font-mono">${plan.price}</span>
+                      <span className="text-xs text-[#52617A] font-light font-mono">{plan.unit}</span>
+                    </div>
+
+                    <ul className="space-y-3" style={{ marginBottom: 'var(--space-sm)' }}>
+                      {plan.features.map((f, j) => (
+                        <li key={j} className="flex items-center gap-3 text-xs text-[#52617A] font-light">
+                          <Check size={12} className="text-[#FFB300] shrink-0" /> {f}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="border-t border-[#11233B]/10" style={{ paddingTop: 'var(--space-sm)' }}>
+                    <Link href="/login" className="btn-primary w-full text-center" style={{ padding: '12px 24px !important', fontSize: '0.75rem' }}>
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#0A1A2C] mr-2 inline-block animate-pulse"></span>
+                      {plan.cta}
+                    </Link>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ROI Calculator */}
+        <section className="enterprise-section w-full bg-[#F1EFE6] border-t border-[#11233B]/10">
+          <div className="container-full">
+            <motion.div {...fadeUp} className="max-w-3xl mx-auto">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-8 h-px bg-[#FFB300]/40" />
+                <span className="font-mono text-[#FFB300] text-[10px] tracking-[0.4em] uppercase">02 // ROI CALCULATOR</span>
+              </div>
+              <h2 className="font-sans font-bold text-[#11233B] text-2xl lg:text-3xl tracking-tight leading-snug uppercase" style={{ marginBottom: 'var(--space-sm)' }}>
+                Estimate your reach.
+              </h2>
+              
+              <div className="bg-[#E7E5DB] border border-[#11233B]/10 p-6 lg:p-10" style={{ borderRadius: '0px' }}>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6" style={{ marginBottom: 'var(--space-sm)' }}>
+                  <div className="flex flex-col">
+                    <label className="text-[9px] font-mono text-[#52617A] uppercase tracking-wider mb-2">Number of Nodes</label>
+                    <input type="number" min={1} value={nodes} onChange={e => setNodes(Number(e.target.value))}
+                      className="bg-transparent border-b-2 border-[#11233B]/15 focus:border-[#FFB300] outline-none text-2xl font-bold text-[#11233B] py-2 font-mono" />
+                    <span className="text-[9px] text-[#52617A] font-mono mt-1">stores</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <label className="text-[9px] font-mono text-[#52617A] uppercase tracking-wider mb-2">Campaign Duration</label>
+                    <input type="number" min={1} value={days} onChange={e => setDays(Number(e.target.value))}
+                      className="bg-transparent border-b-2 border-[#11233B]/15 focus:border-[#FFB300] outline-none text-2xl font-bold text-[#11233B] py-2 font-mono" />
+                    <span className="text-[9px] text-[#52617A] font-mono mt-1">days</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <label className="text-[9px] font-mono text-[#52617A] uppercase tracking-wider mb-2">Verification Tier</label>
+                    <div className="flex gap-2 pt-1">
+                      {(['self', 'agent'] as const).map(t => (
+                        <button key={t} onClick={() => setTier(t)}
+                          className={`flex-1 py-2 text-[10px] font-mono uppercase tracking-wider border transition-all ${tier === t ? 'border-[#FFB300] bg-[#FFB300]/10 text-[#FFB300] font-bold' : 'border-[#11233B]/15 text-[#52617A] hover:border-[#11233B]/30 hover:text-[#11233B]'}`}
+                          style={{ borderRadius: '0px' }}>
+                          {t === 'self' ? 'Self' : 'Agent'}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-                <ul className="space-y-4 mb-10">
-                  {plan.features.map((f, j) => (
-                    <li key={j} className="flex items-center gap-3 text-sm text-slate-600 font-light">
-                      <Check size={14} className="text-amber shrink-0" /> {f}
-                    </li>
-                  ))}
-                </ul>
-                <Link href="/login" className={`w-full py-4 flex justify-center items-center font-bold text-[11px] tracking-[0.2em] uppercase transition-all ${plan.badge ? 'bg-amber text-obsidian hover:opacity-90 shadow-md shadow-amber-500/10' : 'bg-slate-100 border border-slate-200 text-slate-700 hover:bg-slate-200'}`}>
-                  {plan.cta}
+
+                <div className="border-t border-[#11233B]/10 pt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div>
+                    <div className="text-[9px] font-mono text-[#52617A] uppercase tracking-wider mb-1">Total Budget</div>
+                    <div className="text-3xl font-bold text-[#FFB300] font-mono">${total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                  </div>
+                  <div>
+                    <div className="text-[9px] font-mono text-[#52617A] uppercase tracking-wider mb-1">Est. Impressions</div>
+                    <div className="text-3xl font-bold text-[#11233B] font-mono">{(nodes * days * 400).toLocaleString('en-US')}</div>
+                  </div>
+                  <div>
+                    <div className="text-[9px] font-mono text-[#52617A] uppercase tracking-wider mb-1">Est. CPM</div>
+                    <div className="text-3xl font-bold text-[#11233B] font-mono">${cpm}</div>
+                  </div>
+                </div>
+                <p className="text-[10px] text-[#52617A] mt-6 font-light leading-relaxed">* Impressions estimated at 400 daily views per node average. Actual results may vary by province and retail type.</p>
+              </div>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* FAQ */}
+        <section className="enterprise-section w-full bg-[#E7E5DB] border-t border-[#11233B]/10">
+          <div className="container-full max-w-3xl mx-auto">
+            <motion.div {...fadeUp} style={{ marginBottom: 'var(--space-sm)' }}>
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-8 h-px bg-[#FFB300]/40" />
+                <span className="font-mono text-[#FFB300] text-[10px] tracking-[0.4em] uppercase">03 // FAQ</span>
+              </div>
+              <h2 className="font-sans font-bold text-[#11233B] text-2xl lg:text-3xl tracking-tight leading-snug uppercase">
+                Common questions.
+              </h2>
+            </motion.div>
+            
+            <div className="space-y-2">
+              {FAQS.map((faq, i) => (
+                <motion.div key={i} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+                  transition={{ delay: i * 0.06, duration: 0.5 }}
+                  className="border border-[#11233B]/10 bg-[#F1EFE6]" style={{ borderRadius: '0px' }}>
+                  <button onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                    className="w-full flex items-center justify-between px-6 py-5 text-left hover:bg-[#11233B]/5 transition-colors cursor-pointer">
+                    <span className="text-sm font-bold text-[#11233B] pr-4">{faq.q}</span>
+                    <span className="text-[#FFB300] text-lg font-mono shrink-0">{openFaq === i ? '−' : '+'}</span>
+                  </button>
+                  {openFaq === i && (
+                    <div className="px-6 pb-5">
+                      <p className="text-xs text-[#52617A] font-light leading-relaxed">{faq.a}</p>
+                    </div>
+                  )}
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* CTA */}
+        <section className="enterprise-cta-section w-full bg-[#F1EFE6] border-t border-[#11233B]/10 text-center">
+          <div className="container-full flex flex-col items-center justify-center">
+            <div className="max-w-4xl w-full flex flex-col items-center py-12">
+              <span className="os-label mb-4 block text-[#FFB300] text-center">[ SYSTEM ACCESS ]</span>
+              <h2 className="font-sans font-bold text-[#11233B] text-4xl lg:text-[64px] tracking-tight leading-[1.05] mb-10 uppercase max-w-2xl text-center">
+                Start Your First Campaign.
+              </h2>
+              <p className="text-base text-[#52617A] max-w-md mx-auto mb-10 font-light leading-relaxed">
+                No commitment. No minimum spend. Go live in under 48 hours.
+              </p>
+              <div className="flex flex-wrap justify-center gap-8">
+                <Link href="/login" className="btn-primary">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#0A1A2C] mr-2 inline-block animate-pulse"></span>
+                  Launch Campaign
                 </Link>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ROI Calculator */}
-      <section className="relative py-32 bg-obsidian border-t border-slate-200/80">
-        <div className="container-full">
-          <motion.div {...fadeUp} className="max-w-3xl mx-auto">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-8 h-px bg-amber/40" />
-              <span className="mono text-amber text-[11px] tracking-[0.5em] uppercase">02 // ROI CALCULATOR</span>
-            </div>
-            <h2 className="text-4xl font-bold text-dirty-white tracking-tighter uppercase mb-12">
-              Estimate Your <span className="italic font-serif text-amber">Reach.</span>
-            </h2>
-            <div className="bg-slate-50 border border-slate-200 rounded-3xl p-10 lg:p-14 shadow-sm">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-10">
-                <div className="space-y-3">
-                  <label className="text-[10px] mono text-amber/80 uppercase tracking-[0.3em]">Number of Nodes</label>
-                  <input type="number" min={1} value={nodes} onChange={e => setNodes(Number(e.target.value))}
-                    className="w-full bg-transparent border-b-2 border-slate-200 focus:border-amber outline-none text-2xl font-bold text-dirty-white py-2" />
-                  <span className="text-[10px] text-slate-400 mono">stores</span>
-                </div>
-                <div className="space-y-3">
-                  <label className="text-[10px] mono text-amber/80 uppercase tracking-[0.3em]">Campaign Duration</label>
-                  <input type="number" min={1} value={days} onChange={e => setDays(Number(e.target.value))}
-                    className="w-full bg-transparent border-b-2 border-slate-200 focus:border-amber outline-none text-2xl font-bold text-dirty-white py-2" />
-                  <span className="text-[10px] text-slate-400 mono">days</span>
-                </div>
-                <div className="space-y-3">
-                  <label className="text-[10px] mono text-amber/80 uppercase tracking-[0.3em]">Verification Tier</label>
-                  <div className="flex gap-3 pt-2">
-                    {(['self', 'agent'] as const).map(t => (
-                      <button key={t} onClick={() => setTier(t)}
-                        className={`flex-1 py-2 text-[11px] mono uppercase tracking-widest border transition-all ${tier === t ? 'border-amber bg-amber/10 text-amber' : 'border-slate-200 text-slate-400 hover:border-slate-300 hover:text-slate-600'}`}>
-                        {t === 'self' ? 'Self' : 'Agent'}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                <Link href="/#pilot" className="btn-secondary">
+                  Request Pilot <ArrowRight size={12} className="opacity-70 stroke-[2.5]" />
+                </Link>
               </div>
-              <div className="border-t border-slate-200 pt-10 grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div>
-                  <div className="text-[10px] mono text-slate-400 uppercase tracking-widest mb-2">Total Budget</div>
-                  <div className="text-4xl font-bold text-amber mono">${total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-                </div>
-                <div>
-                  <div className="text-[10px] mono text-slate-400 uppercase tracking-widest mb-2">Est. Impressions</div>
-                  <div className="text-4xl font-bold text-dirty-white mono">{(nodes * days * 400).toLocaleString('en-US')}</div>
-                </div>
-                <div>
-                  <div className="text-[10px] mono text-slate-400 uppercase tracking-widest mb-2">Est. CPM</div>
-                  <div className="text-4xl font-bold text-dirty-white mono">${cpm}</div>
-                </div>
-              </div>
-              <p className="text-[11px] text-slate-400 mt-6 font-light">* Impressions estimated at 400 daily views per node average. Actual results may vary by province and retail type.</p>
             </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* FAQ */}
-      <section className="relative py-32 bg-slate-50 border-t border-slate-200/80">
-        <div className="container-full max-w-3xl mx-auto">
-          <motion.div {...fadeUp} className="mb-16">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-8 h-px bg-amber/40" />
-              <span className="mono text-amber text-[11px] tracking-[0.5em] uppercase">03 // FAQ</span>
-            </div>
-            <h2 className="text-4xl font-bold text-dirty-white tracking-tighter uppercase">
-              Common <span className="italic font-serif text-amber">Questions.</span>
-            </h2>
-          </motion.div>
-          <div className="space-y-3">
-            {FAQS.map((faq, i) => (
-              <motion.div key={i} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-                transition={{ delay: i * 0.06, duration: 0.5 }}
-                className="border border-slate-200 bg-white rounded-xl overflow-hidden shadow-sm">
-                <button onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  className="w-full flex items-center justify-between px-8 py-6 text-left hover:bg-slate-50 transition-colors">
-                  <span className="text-sm font-medium text-dirty-white pr-4">{faq.q}</span>
-                  <span className="text-amber text-xl shrink-0">{openFaq === i ? '−' : '+'}</span>
-                </button>
-                {openFaq === i && (
-                  <div className="px-8 pb-6">
-                    <p className="text-sm text-slate-500 font-light leading-[1.8]">{faq.a}</p>
-                  </div>
-                )}
-              </motion.div>
-            ))}
           </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="relative py-32 bg-obsidian border-t border-slate-200/80 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(201,115,32,0.04),transparent_70%)]" />
-        <div className="container-full relative z-10 text-center">
-          <motion.div {...fadeUp}>
-            <span className="mono text-amber text-[11px] tracking-[0.5em] uppercase mb-6 block">04 // GET STARTED</span>
-            <h2 className="text-5xl lg:text-7xl font-bold text-dirty-white tracking-tighter uppercase mb-8">
-              Start Your<br /><span className="italic font-serif text-amber">First Campaign.</span>
-            </h2>
-            <p className="text-lg text-slate-500 max-w-lg mx-auto mb-12 font-light">
-              No commitment. No minimum spend. Go live in under 48 hours.
-            </p>
-            <div className="flex flex-wrap justify-center gap-5">
-              <Link href="/login" className="btn-molten px-10 h-[56px] inline-flex items-center gap-3 text-obsidian font-bold">
-                Launch Campaign <ArrowRight size={16} />
-              </Link>
-              <Link href="/#pilot" className="btn-ghost px-8 h-[56px] inline-flex items-center text-slate-700 hover:text-slate-900 border-slate-200 hover:bg-slate-50">
-                Request Pilot
-              </Link>
-            </div>
-          </motion.div>
-        </div>
-      </section>
+        </section>
+      </main>
 
       <Footer />
     </div>
