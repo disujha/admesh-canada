@@ -964,33 +964,38 @@ body.dashboard-mode::after {
 .db-btn-primary {
   height: 2.6rem;
   padding: 0 1.25rem;
-  border-radius: 4px;
-  border: 1px solid var(--db-text);
-  background: var(--db-text); /* Deep Ink */
-  color: var(--db-bg) !important; /* Warm Paper */
+  border-radius: 0px !important; /* Sharp corners to match technical motif */
+  border: 1px solid #C97320;
+  background: linear-gradient(180deg, #FFC107 0%, #FFB300 100%);
+  color: #0A1A2C !important;
   font-size: 0.72rem;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   font-family: var(--font-mono), monospace;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  transition: all 0.15s ease;
+  box-shadow: 0 2px 8px rgba(224, 155, 45, 0.25);
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
 }
 
 .db-btn-primary:hover {
-  background: var(--db-accent); /* Route Amber */
-  border-color: var(--db-accent);
-  color: var(--navy-panel) !important;
+  background: linear-gradient(180deg, #FFD54F 0%, #FFC107 100%) !important;
+  box-shadow: 0 4px 12px rgba(224, 155, 45, 0.35) !important;
+  border-color: #E09B2D;
+}
+
+.db-btn-primary:active {
+  transform: scale(0.98);
 }
 
 .db-btn-ghost {
   height: 2.6rem;
   padding: 0 1.25rem;
-  border-radius: 4px;
+  border-radius: 0px !important; /* Sharp corners */
   border: 1px solid var(--db-border-strong);
   background: transparent;
   color: var(--db-text) !important;
@@ -1017,7 +1022,7 @@ body.dashboard-mode::after {
   align-items: center;
   justify-content: center;
   padding: 0.2rem 0.5rem;
-  border-radius: 4px;
+  border-radius: 0px !important; /* Sharp corners */
   font-size: 0.68rem;
   font-weight: 600;
   line-height: 1.2;
