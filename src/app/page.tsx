@@ -7,6 +7,7 @@ import CustomCursor from '@/components/marketing/CustomCursor';
 import BrandMarquee from '@/components/marketing/BrandMarquee';
 import NetworkMap from '@/components/marketing/NetworkMap';
 import PhoneAuthModal from '@/components/marketing/PhoneAuthModal';
+import RetailAdFormats from '@/components/marketing/RetailAdFormats';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -119,7 +120,7 @@ const LandingPage = () => {
       <Navbar onPlanClick={() => setIsAuthOpen(true)} onDashboardClick={goToDashboardWithLoader} />
       
       {/* Main content wrapper */}
-      <main className="w-full">
+      <main className="w-full lg:pl-[5vw]">
         
         {/* SECTION 1: HERO (Asymmetrical 58/42 Split) */}
         <section className="enterprise-hero w-full bg-[#F1EFE6]">
@@ -137,20 +138,21 @@ const LandingPage = () => {
 
                 <p className="text-lg lg:text-[20px] text-[#52617A] font-light leading-relaxed max-w-[54ch] mb-8">
                   Connect your brand with thousands of verified storefront locations across Canada. Plan, deploy, and verify physical advertising campaigns at scale.
-                </p>
-
-                <div className="flex flex-wrap items-center gap-6 mb-10">
-                  <button 
+                </p>                <div className="flex flex-wrap items-center gap-8 mb-10">
+                  <button
                     onClick={() => setIsAuthOpen(true)}
-                    className="btn-molten border-none"
+                    className="btn-primary"
                   >
+                    {/* Small technical status indicator dot */}
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#0A1A2C] mr-2 inline-block animate-pulse"></span>
                     Book a Demo
                   </button>
-                  <a 
+                  {/* SECONDARY CTA — referencing btn-secondary class */}
+                  <a
                     href="#coverage"
-                    className="btn-ghost decoration-none flex items-center gap-2"
+                    className="btn-secondary"
                   >
-                    Explore the Network <ArrowRight size={14} />
+                    Explore the Network <ArrowRight size={12} className="opacity-70 stroke-[2.5]" />
                   </a>
                 </div>
 
@@ -244,7 +246,7 @@ const LandingPage = () => {
               {/* Right 5 columns (42%): Copy Block */}
               <div className="lg:col-span-5 flex flex-col items-start">
                 <span className="os-label mb-4 block text-[#FFB300]">[ OPPORTUNITY ]</span>
-                <h2 className="font-sans font-bold text-[#11233B] text-3xl lg:text-[48px] tracking-tight leading-[1.1] mb-6 uppercase">
+                <h2 className="font-sans font-bold text-[#11233B] text-2xl lg:text-3xl tracking-tight leading-snug mb-6 uppercase">
                   The physical retail opportunity.
                 </h2>
                 <p className="text-lg text-[#52617A] font-light leading-relaxed mb-6">
@@ -264,7 +266,7 @@ const LandingPage = () => {
           <div className="container-full">
             <div className="max-w-3xl mb-[48px]">
               <span className="os-label mb-4 block text-[#FFB300]">[ OPERATIONS ]</span>
-              <h2 className="font-sans font-bold text-[#11233B] text-3xl lg:text-[48px] tracking-tight leading-[1.1] uppercase">
+              <h2 className="font-sans font-bold text-[#11233B] text-2xl lg:text-3xl tracking-tight leading-snug uppercase">
                 How the network works.
               </h2>
             </div>
@@ -282,7 +284,8 @@ const LandingPage = () => {
                       muted 
                       loop 
                       playsInline 
-                      className="w-full h-full object-cover opacity-80"
+                      className="w-full h-full object-cover"
+                      style={{ filter: 'brightness(1.15) contrast(1.1)' }}
                     >
                       <source src="/videos/admesh-intro.mp4" type="video/mp4" />
                     </video>
@@ -309,7 +312,8 @@ const LandingPage = () => {
                       muted 
                       loop 
                       playsInline 
-                      className="w-full h-full object-cover opacity-80"
+                      className="w-full h-full object-cover"
+                      style={{ filter: 'brightness(1.15) contrast(1.1)' }}
                     >
                       <source src="/videos/deploy.webm" type="video/webm" />
                     </video>
@@ -336,7 +340,8 @@ const LandingPage = () => {
                       muted 
                       loop 
                       playsInline 
-                      className="w-full h-full object-cover opacity-80"
+                      className="w-full h-full object-cover"
+                      style={{ filter: 'brightness(1.15) contrast(1.1)' }}
                     >
                       <source src="/videos/verification-terminal-loop.webm" type="video/webm" />
                     </video>
@@ -357,7 +362,10 @@ const LandingPage = () => {
           </div>
         </section>
 
-        {/* SECTION 4: NATIONAL SCALE (Full-Bleed Field Navy Panel - 58/42 Grid) */}
+        {/* SECTION 4: RETAIL AD FORMATS */}
+        <RetailAdFormats />
+
+        {/* SECTION 5: NATIONAL SCALE (Full-Bleed Field Navy Panel - 58/42 Grid) */}
         <section id="coverage" className="enterprise-section w-full bg-[#0A1A2C] border-t border-[#11233B]/10 text-[#F1EFE6]">
           <div className="container-full">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-[48px] items-center">
@@ -423,42 +431,61 @@ const LandingPage = () => {
           </div>
         </section>
 
-        {/* SECTION 5: CASE STUDY (42/58 Grid Split - Copy Left, Image Right) */}
+        {/* SECTION 5: CASE STUDY — Stats strip + full-width pull-quote + image */}
         <section className="enterprise-section w-full bg-[#F1EFE6] border-t border-[#11233B]/10">
           <div className="container-full">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-[64px] items-start">
-              
-              {/* Left 5 columns (42%): Case Study metrics & quote */}
-              <div className="lg:col-span-5 flex flex-col items-start">
-                <span className="os-label mb-4 block text-[#FFB300]">[ RESULTS ]</span>
-                <h2 className="font-sans font-bold text-[#11233B] text-3xl lg:text-[48px] tracking-tight leading-[1.1] mb-8 uppercase">
-                  Enterprise results.
-                </h2>
 
-                <div className="grid grid-cols-2 gap-8 mb-8 w-full font-mono">
-                  <div>
-                    <span className="text-3xl font-bold text-[#11233B] block mb-1">
-                      <TickingCounter target={12.4} decimals={1} suffix="M" />
-                    </span>
-                    <span className="text-[9px] text-[#52617A] uppercase tracking-wider block font-semibold">Unique Reach</span>
+            {/* Section label + heading */}
+            <div className="max-w-3xl mb-[48px]">
+              <span className="os-label mb-4 block text-[#FFB300]">[ RESULTS ]</span>
+              <h2 className="font-sans font-bold text-[#11233B] text-2xl lg:text-3xl tracking-tight leading-snug uppercase">
+                Enterprise results.
+              </h2>
+            </div>
+
+            {/* Stats strip — compact horizontal row */}
+            <div className="flex flex-wrap gap-0 border border-[#11233B]/10 w-full max-w-xl" style={{ marginBottom: 'var(--space-sm)' }}>
+              <div className="flex-1 border-r border-[#11233B]/10" style={{ padding: 'var(--space-sm)' }}>
+                <span className="font-mono text-[9px] uppercase tracking-wider text-[#52617A] font-semibold block" style={{ marginBottom: 'var(--space-xs)' }}>Unique Reach</span>
+                <span className="font-mono text-3xl font-bold text-[#11233B]">
+                  <TickingCounter target={12.4} decimals={1} suffix="M" />
+                </span>
+              </div>
+              <div className="flex-1" style={{ padding: 'var(--space-sm)' }}>
+                <span className="font-mono text-[9px] uppercase tracking-wider text-[#52617A] font-semibold block" style={{ marginBottom: 'var(--space-xs)' }}>Active Nodes</span>
+                <span className="font-mono text-3xl font-bold text-[#11233B]">
+                  <TickingCounter target={1800} suffix="+" />
+                </span>
+              </div>
+            </div>
+
+            {/* Main grid: pull-quote left, image right */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-[48px] items-start">
+
+              {/* Pull-quote block — full persuasive weight */}
+              <div className="lg:col-span-5">
+                <div className="bg-[#0A1A2C] relative overflow-hidden" style={{ padding: 'var(--space-sm) var(--space-md) var(--space-md) var(--space-md)' }}>
+                  {/* Oversized decorative quotation mark */}
+                  <div
+                    className="font-serif font-black text-[#FFB300] leading-none select-none"
+                    style={{ fontSize: '72px', lineHeight: '0.8', opacity: 0.9, marginBottom: 'var(--space-xs)' }}
+                    aria-hidden="true"
+                  >
+                    &ldquo;
                   </div>
-                  <div>
-                    <span className="text-3xl font-bold text-[#11233B] block mb-1">
-                      <TickingCounter target={1800} suffix="+" />
-                    </span>
-                    <span className="text-[9px] text-[#52617A] uppercase tracking-wider block font-semibold">Active Nodes</span>
+                  <blockquote className="text-[#F1EFE6] font-light leading-relaxed" style={{ fontSize: '1.1rem', marginBottom: 'var(--space-sm)' }}>
+                    AdMesh enabled us to scale our campaign across hundreds of storefronts with absolute visibility. The photographic verification gave our marketing team complete confidence in our physical spend.
+                  </blockquote>
+                  <div className="border-t border-[#F1EFE6]/10" style={{ paddingTop: 'var(--space-sm)' }}>
+                    <cite className="not-italic">
+                      <span className="block font-mono font-bold text-[#FFB300] text-[10px] uppercase tracking-widest" style={{ marginBottom: '4px' }}>VP of Brand Marketing</span>
+                      <span className="block font-mono text-[10px] uppercase tracking-widest text-[#52617A]">CPG Beverages · Canada</span>
+                    </cite>
                   </div>
                 </div>
-                
-                <blockquote className="text-lg text-[#11233B] font-light leading-relaxed mb-6 border-l-2 border-[#FFB300] pl-5 italic">
-                  "AdMesh enabled us to scale our campaign across hundreds of storefronts with absolute visibility. The photographic verification gave our marketing team complete confidence in our physical spend."
-                </blockquote>
-                <cite className="os-label-muted not-italic block">
-                  — VP OF BRAND MARKETING, CPG BEVERAGES
-                </cite>
               </div>
 
-              {/* Right 7 columns (58%): Supermarket Image inside Amber Reticle Frame */}
+              {/* Right 7 columns: Supermarket Image inside Amber Reticle Frame */}
               <div className="lg:col-span-7">
                 <div className="relative">
                   <div className="reticle-frame bg-[#0A1A2C] shadow-lg">
@@ -492,8 +519,9 @@ const LandingPage = () => {
               </h2>
               <button 
                 onClick={() => setIsAuthOpen(true)}
-                className="btn-molten border-none"
+                className="btn-primary"
               >
+                <span className="w-1.5 h-1.5 rounded-full bg-[#0A1A2C] mr-2 inline-block animate-pulse"></span>
                 Book a Demo
               </button>
             </div>
