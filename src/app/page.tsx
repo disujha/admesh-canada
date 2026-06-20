@@ -123,7 +123,7 @@ const LandingPage = () => {
       <main className="w-full lg:pl-[5vw]">
         
         {/* SECTION 1: HERO (Asymmetrical 58/42 Split) */}
-        <section className="enterprise-hero w-full bg-[#F1EFE6]">
+        <section id="network" className="enterprise-hero w-full bg-[#F1EFE6]">
           <div className="container-full">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-[48px] items-center">
               
@@ -432,7 +432,7 @@ const LandingPage = () => {
         </section>
 
         {/* SECTION 5: CASE STUDY — Stats strip + full-width pull-quote + image */}
-        <section className="enterprise-section w-full bg-[#F1EFE6] border-t border-[#11233B]/10">
+        <section id="verification" className="enterprise-section w-full bg-[#F1EFE6] border-t border-[#11233B]/10">
           <div className="container-full">
 
             {/* Section label + heading */}
@@ -510,7 +510,7 @@ const LandingPage = () => {
         </section>
 
         {/* SECTION 6: FINAL CALL TO ACTION (Minimal Operating System Access Portal) */}
-        <section className="enterprise-cta-section w-full bg-[#F1EFE6] border-t border-[#11233B]/10 text-center">
+        <section id="pilot" className="enterprise-cta-section w-full bg-[#F1EFE6] border-t border-[#11233B]/10 text-center">
           <div className="container-full flex flex-col items-center justify-center">
             <div className="max-w-4xl w-full flex flex-col items-center py-12">
               <span className="os-label mb-4 block text-[#FFB300] text-center">[ SYSTEM ACCESS ]</span>
